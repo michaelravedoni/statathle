@@ -1,0 +1,254 @@
+{% extends "_base.twig" %}
+{% import '_macros.twig' as macros %}
+{% set title = athlete.prenom_a ~ ' ' ~ athlete.nom_a %}
+
+{% block content %}
+<div class="ui stackable grid" style="overflow-x:scroll;">
+	<div class="eleven wide column" id="resultsList">
+		
+		<h1>{{ athlete.prenom_a }} {{ athlete.nom_a }} <small>- ({{ athlete.date_a|date('Y') }})</small></h1>
+	
+		<div class="ui form">
+			<div class="field">
+				<select class="ui search dropdown" id="filter-disciplines">
+					<option selected="selected" value="">Toutes les disciplines</option>
+					{% for item in disciplines %}
+					<option value="{{ item.id_d }}">{{ item.nom_d }}</option>
+					{% endfor %}
+				</select>
+			</div>
+		</div>
+		<div class="list">
+			{# For url get variables (?disc=all) or not disc variable / tri avec list.js #}
+			{% for item in disciplines if discipline_id == 'all' %}
+			<div data-id="{{ item.id_d }}">
+				<h2>{{ item.nom_d }} <span class="ca-small"><a href="{{baseUrl}}statistiques/{{ item.id_d }}?sexe={{ athlete.sexe_a }}"><i class="database icon"></i> records du CA Sion</a></span></h2>
+	
+				<table id="results-table-{{loop.index0}}" class="ca-table resultats">
+					<thead>
+						<tr>
+							<th>N°</th>
+							<th>Performance</th>
+							<th>Performance brute</th>
+							<th>Rang</th>
+							<th>Date</th>
+							<th>Compétition</th>
+							<th>Lieu</th>
+						</tr>
+					</thead>
+					<tbody>
+						{% for res in results if item.id_d == res.id_d %}
+						<tr>
+							<td id="nr" class="ca-bug"><a href="{{baseUrl}}resultat/{{res.id_r}}"><i class="bug icon"></i> {{res.id_r}}</a></td>
+							<td class="performance" id="performance">{{ res.performance }}</td>
+							<td>{{ res.tri_perf }}</td>
+							<td id="rang">{{ res.rang_r }}</td>
+							<td id="date">{{ res.date_c|date('d.m.Y') }}</td>
+							<td><a href="{{baseUrl}}competitions/{{ res.id_c }}">{{ res.nom_c }}</a></td>
+							<td>{{ res.lieu_c }}</td>
+						</tr>
+						{% endfor %}
+					</tbody>
+				</table>
+	
+				<script type="text/javascript">
+			
+				$(function () { 
+					var myChart = Highcharts.chart('chart-{{loop.index0}}', {
+						chart: {
+							type: 'line'
+						},
+						title: {
+							text: '{{item.nom_d}}'
+						},
+						xAxis: {
+							categories: [{% for res in results if item.id_d == res.id_d %}'{{ res.date_c|date('d.m.Y') }}',{% endfor %}]
+						},
+						yAxis: {
+							title: {
+								text: '[m] ou [s]'
+							}
+						},
+						series: [{
+							name: 'Performance',
+							data: [{% for res in results if item.id_d == res.id_d %}{{res.tri_perf}},{% endfor %}]
+						},
+						]
+					});
+				});
+				
+				</script>
+	
+				<div class="ui accordion">
+					<div class="active title"><i class="dropdown icon"></i>Graph</div>
+					<div class="content">
+						<div id="chart-{{loop.index0}}" style="height: 400px;" ></div>
+					</div>
+				</div>
+	
+				<script>
+				$('#results-table-{{loop.index0}}').DataTable(
+					{
+						"order": [[ 2, "{% if item.tri_d == 'ASC' %}asc{% elseif item.tri_d == 'DES' %}desc{% endif %}" ]],
+						"columnDefs": [
+						{ "type": "num", "targets": 1 },
+						{ "type": "de_date", "targets": 4 },
+						{ "visible": false, "targets": 2 },
+						{ "orderable": false, "targets": [0, 3, 5, 6] }
+						],
+						"paging":   false,
+						"ordering": true,
+						"info":     false,
+						"autoWidth": false,
+						"searching": false
+					} );
+					</script>
+				</div>
+		
+				{# For url get variables (?disc=discipline_id) #}
+				{% else %}
+	
+				<h2>{{ discipline.nom_d }} <span class="ca-small"><a href="{{baseUrl}}statistiques/{{ item.id_d }}?sexe={{ athlete.sexe_a }}"><i class="database icon"></i> records du CA Sion</a></span></h2>
+				
+				<table id="results-table-disc" class="ca-table resultats">
+					<thead>
+						<tr>
+							<th>N°/id_r</th>
+							<th>Performance</th>
+							<th>Performance brute</th>
+							<th>Rang</th>
+							<th>Date</th>
+							<th>Compétition</th>
+							<th>Lieu</th>
+						</tr>
+					</thead>
+					<tbody>
+						{% for res in results %}
+						{% if res.id_d == discipline_id %}
+						<tr>
+							<td id="nr" class="ca-bug"><a href="{{baseUrl}}resultat/{{res.id_r}}"><i class="bug icon"></i> {{res.id_r}}</a></td>
+							<td class="performance" id="performance">{{ res.performance }}</td>
+							<td>{{ res.tri_perf }}</td>
+							<td id="rang">{{ res.rang_r }}</td>
+							<td id="date">{{ res.date_c|date('d.m.Y') }}</td>
+							<td><a href="competitions/{{ res.id_c }}">{{ res.nom_c }}</a></td>
+							<td>{{ res.lieu_c }}</td>
+						</tr>
+						{% endif %}
+						{% endfor %}
+					</tbody>
+				</table>
+			
+			<script>
+			$('#results-table-disc').DataTable(
+				{
+					"order": [[ 2, "{% if discipline.tri_d == 'ASC' %}asc{% elseif discipline.tri_d == 'DES' %}desc{% endif %}" ]],
+					"columnDefs": [
+					{ "type": "num", "targets": 1 },
+					{ "type": "de_date", "targets": 4 },
+					{ "visible": false, "targets": 2 },
+					{ "orderable": false, "targets": [0, 3, 5, 6] }
+					],
+					"paging":   false,
+					"ordering": true,
+					"info":     false,
+					"autoWidth": false,
+					"searching": false,
+					"dom": 'Bfrtip',
+					"buttons": ['copy', 'csv', 'excel', 'print']
+				} );
+				</script>
+				{% endfor %}
+
+			<script>
+			var options = {
+				valueNames: [
+				{ data: ['id'] },
+				]
+			};
+			var resultsList = new List('resultsList', options);
+
+			$('#filter-disciplines').change(function () {
+				var selection = this.value;
+
+				if (selection) {
+					resultsList.filter(function(item) {
+						return (item.values().id == selection);
+					});
+				} else {
+					userList.filter();
+				}
+
+			});
+			</script>
+
+		</div>
+	</div>
+		<div class="five wide column">
+			<!-- Records -->
+			<h2>Records</h2>
+			<table class="ca-table">
+				<thead>
+					<tr>
+						<th>Discipline</th>
+						<th id="performance">Record</th>
+						<th>Âge</th>
+						<th>Année</th>
+					</tr>
+				</thead>
+				<tbody>
+					{% for item in disciplines %}
+			
+					{% for res in recordsAsc if (item.id_d == res.id_d) %}
+					{% if (loop.first) and (res.tri_d == 'ASC') %}
+					
+					{% if res.date_c|date('Y') == "now"|date('Y') %}
+					<tr class="year">
+					{% else %}
+					<tr>
+					{% endif %}
+						<td><a href="{{baseUrl}}athletes/{{res.id_a}}?disc={{res.id_d}}">{{ res.nom_d }}</a></td>
+						<td>{{ res.performance }}</td>
+						<td>{% set diffDate = date(res.date_c).diff(date(res.date_a)) %}{% if res.date_a != '0000-00-00' %}{{ (diffDate.days / 365)|round }}{% endif %}</td>
+						<td>{{ res.date_c|date('Y') }}</td>
+					</tr>
+					{% endif %}
+					{% endfor %}
+			
+					{% for res in recordsDesc if (item.id_d == res.id_d) %}
+					{% if (loop.first) and (res.tri_d == 'DESC') %}
+					<tr>
+						<td><a href="{{baseUrl}}athletes/{{res.id_a}}?disc={{res.id_d}}">{{ res.nom_d }}</a></td>
+						<td>{{ res.performance }}</td>
+						<td>{% set diffDate = date(res.date_c).diff(date(res.date_a)) %}{% if res.date_a != '0000-00-00' %}{{ (diffDate.days / 365)|round }}{% endif %}</td>
+						<td>{{ res.date_c|date('Y') }}</td>
+					</tr>
+					{% endif %}
+					{% endfor %}
+			
+					{% endfor %}
+				</tbody>
+			</table>
+			
+			<!-- Palmarès -->
+			{% if palmaresChamp|length > 0 %}
+			<h2>Palmarès</h2>
+			<table class="palmares">
+				{% for champ in palmaresChamp %}
+				<tr class="championnat">
+					<td colspan="3">{{champ.nomlong_cat_c}}</td>
+				</tr>
+				{% for item in palmares if champ.id_cat_c == item.id_cat_c %}
+				<tr class="ch-entry">
+					<td class="{{ macros.couleurmed(item.rang_p) }}">{{ macros.iconmed(item.rang_p) }}</td>
+					<td><a href="{{baseUrl}}competitions/{{item.id_c}}">{{item.lieu_c}} {{item.date_c|date('Y')}}</a></td>
+					<td>{{item.nom_d}}</td>
+				</tr>
+				{% endfor %}
+				{% endfor %}
+			</table>
+			{% endif %}
+	
+		</div>
+	</div>
+	{% endblock %}

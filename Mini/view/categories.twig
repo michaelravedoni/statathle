@@ -1,0 +1,19 @@
+{% extends "_base.twig" %}
+{% import '_macros.twig' as macros %}
+{% set title = "Résultats/Catégories" %}
+
+{% block content %}
+<style>
+.discipline-header{font-size:65%; min-width: 50px;}
+.input-limites{width:40px;}
+</style>
+<div class="ui container" style="overflow-x:scroll;">
+	<h1>Résultats par catégories et par années</h1>
+	<p>Pour commencer, choisissez :</p>
+	<p>1. Année : <a href="{{baseUrl}}categories/2016/{{categorie}}">2016</a> - <a href="{{baseUrl}}categories/2017/{{categorie}}">2017</a></p>
+	<p>2. Catégorie : <a href="{{baseUrl}}categories/{{annee}}/all">Tous</a> - <a href="{{baseUrl}}categories/{{annee}}/u23">U23</a> - <a href="{{baseUrl}}categories/{{annee}}/u20">U20</a> - <a href="{{baseUrl}}categories/{{annee}}/u18">U18</a> - <a href="{{baseUrl}}categories/{{annee}}/u16">U16</a> - <a href="{{baseUrl}}categories/{{annee}}/u14">U14</a> - <a href="{{baseUrl}}categories/{{annee}}/u12">U12</a> - <a href="{{baseUrl}}categories/{{annee}}/u10">U10</a></p>
+	<p>Vous pourrez ensuite choisir d'afficher l'<em>année entière</em>, la période <em>indoor</em> ou <em>outdor</em>. L'option <em>Limites</em> vous permettra également d'afficher les résultats des deux dernières années. De plus, grâce aux champs présents dans chaque colonne de discipline, vous pourrez rapidement voir quel athlète a atteint les la limite entrée.</p>
+	
+	
+</div>
+{% endblock %}

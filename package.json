@@ -1,0 +1,18 @@
+{
+  "name": "statathle",
+  "description": "Command line tool for generating a changelog from git tags and commit history",
+  "version": "0.0.1",
+  "author": "Michael Ravedoni (http://github.com/michaelravedoni)",
+  "homepage": "https://github.com/michaelravedoni/statathle",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/michaelravedoni/statathle.git"
+  },
+  "license": "MIT",
+  "devDependencies": {
+    "auto-changelog": "^0.3.1"
+  },
+  "scripts": {
+    "version": "auto-changelog --package; git add CHANGELOG.md"
+  }
+}

@@ -1,0 +1,38 @@
+{% extends "_base.twig" %}
+{% import '_macros.twig' as macros %}
+{% set firstItemComp = resultats|first %}
+{% set title = firstItemComp.nom_c %}
+
+{% block content %}
+
+<div class="ui container" style="overflow-x:scroll;">
+	<h1>{{ firstItemComp.nom_c }} - {{ firstItemComp.lieu_c }}, {{ firstItemComp.date_c|date('d.m.Y') }}</h1>
+	
+	<table id="results-table" class="ca-table resultats">
+		<thead>
+			<tr>
+				<th>Rang</th>
+				<th>Discipline</th>
+				<th>Performance</th>
+				<th>Performance brute</th>
+				<th>Vent</th>
+				<th>Nom</th>
+				<th>Date</th>
+			</tr>
+		</thead>
+		<tbody>
+			{% for res in resultats %}
+			<tr>
+				<td id="nr" class="ca-bug"><a href="{{baseUrl}}resultat/{{res.id_r}}"><i class="bug icon"></i> {{res.rang_r}}</a></td>
+				<td>{{ res.nom_d }}</td>
+				<td class="performance" id="performance">{{ res.performance }}</td>
+				<td>{{ res.tri_perf }}</td>
+				<td id="vent">{{ res.vent_r }}</td>
+				<td id="nom"><a href="{{baseUrl}}athletes/{{res.id_a}}">{{ res.prenom_a }} {{ res.nom_a }}</a></td>
+				<td id="date">{{ res.date_a|date('d.m.Y') }}</td>
+			</tr>
+			{% endfor %}
+		</tbody>
+	</table>
+</div>
+{% endblock %}

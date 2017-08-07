@@ -1,0 +1,385 @@
+{% macro couleurmed(rang) %}
+{% if rang == 1 %}
+gold
+{% elseif rang == 2 %}
+argent
+{% elseif rang == 3 %}
+bronze
+{% else %}
+rang
+{% endif %}
+{% endmacro %}
+
+{% macro iconmed(rang) %}
+{% if rang == 1 %}
+<img src="http://upload.wikimedia.org/wikipedia/commons/b/be/Gouden_medaille.svg" style="width:18px;vertical-align:middle;"/>
+{% elseif rang == 2 %}
+<img src="http://upload.wikimedia.org/wikipedia/commons/5/50/Zilveren_medaille.svg" style="width:18px;vertical-align:middle;"/>
+{% elseif rang == 3 %}
+<img src="http://upload.wikimedia.org/wikipedia/commons/6/66/Bronzen_medaille.svg" style="width:18px;vertical-align:middle;"/>
+{% else %}
+{{rang}}
+{% endif %}
+{% endmacro %}
+
+{% macro csv(data) %}
+{% for item in data if data %}
+    {{- loop.first ? 'Phones: ' : ', ' }}
+    {{ item -}}
+{% endfor %}
+{% endmacro %}
+
+
+
+
+{%- macro catDipl(now, anneeNaiss, sexe, discipline) -%}
+{% spaceless %}
+	{% set nowYear = now %}
+	{% set u16MaxYear = nowYear - 15 %}
+	{% set u14MaxYear = nowYear - 13 %}
+	{% set u12MaxYear = nowYear - 11 %}
+	{% set u10MaxYear = nowYear - 9 %}
+
+	{%- if anneeNaiss >= u16MaxYear and anneeNaiss < u14MaxYear and sexe == 'w' and discipline in ['41', '74', '49', '100', '102', '104', '105', '106', '107', '108', '109', '120', '121', '122', '123', '174', '203'] -%}background-color:#ef9a9a;
+	{%- elseif anneeNaiss >= u16MaxYear and anneeNaiss < u14MaxYear and sexe == 'm' and discipline in ['41', '75', '76', '49', '100', '102', '104', '105', '106', '107', '108', '109', '120', '121', '122', '123', '174', '203'] -%}background-color:#90CAF9;
+	{%- elseif anneeNaiss >= u14MaxYear and anneeNaiss < u12MaxYear and sexe == 'w' and discipline in ['40', '69', '70', '71', '72', '73', '49', '100', '102', '104', '105', '106', '107', '108', '109', '120', '121', '122', '123', '174', '203'] -%}background-color:#ffcdd2;
+	{%- elseif anneeNaiss >= u14MaxYear and anneeNaiss < u12MaxYear and sexe == 'm' and discipline in ['40', '74', '49', '100', '102', '104', '105', '106', '107', '108', '109', '120', '121', '122', '123', '174', '203'] -%}background-color:#BBDEFB;
+	{%- elseif anneeNaiss >= u12MaxYear and anneeNaiss < u10MaxYear and sexe == 'w' and discipline in ['40', '49', '100', '102', '104', '105', '106', '107', '108', '109', '124', '165'] -%}background-color:#F8BBD0;
+	{%- elseif anneeNaiss >= u12MaxYear and anneeNaiss < u10MaxYear and sexe == 'm' and discipline in ['40', '49', '100', '102', '104', '105', '106', '107', '108', '109', '124', '165'] -%}background-color:#80DEEA;
+	{%- else -%}
+	{%- endif -%}
+	
+	{%- if anneeNaiss >= u16MaxYear and anneeNaiss < u14MaxYear and sexe == 'w' and discipline in ['41', '74'] -%}border:solid 2px blue;
+	{%- elseif anneeNaiss >= u16MaxYear and anneeNaiss < u14MaxYear and sexe == 'w' and discipline in ['120', '121', '122', '123', '174', '203', '104', '105', '106', '107', '108', '109'] -%}border:solid 2px green;
+	{%- elseif anneeNaiss >= u14MaxYear and anneeNaiss < u12MaxYear and sexe == 'w' and discipline in ['40', '69', '70', '71', '72', '73'] -%}border:solid 2px blue;
+	{%- elseif anneeNaiss >= u14MaxYear and anneeNaiss < u12MaxYear and sexe == 'w' and discipline in ['120', '121', '122', '123', '174', '203', '104', '105', '106', '107', '108', '109'] -%}border:solid 2px green;
+	{%- elseif anneeNaiss >= u12MaxYear and anneeNaiss < u10MaxYear and sexe == 'w' and discipline in ['104', '105', '106', '107', '108', '109', '124', '165'] -%}border:solid 2px green;
+	{%- elseif anneeNaiss >= u16MaxYear and anneeNaiss < u14MaxYear and sexe == 'm' and discipline in ['41', '75', '76'] -%}border:solid 2px red;
+	{%- elseif anneeNaiss >= u16MaxYear and anneeNaiss < u14MaxYear and sexe == 'm' and discipline in ['120', '121', '122', '123', '174', '203', '104', '105', '106', '107', '108', '109'] -%}border:solid 2px green;
+	{%- elseif anneeNaiss >= u14MaxYear and anneeNaiss < u12MaxYear and sexe == 'm' and discipline in ['40', '74'] -%}border:solid 2px red;
+	{%- elseif anneeNaiss >= u14MaxYear and anneeNaiss < u12MaxYear and sexe == 'm' and discipline in ['120', '121', '122', '123', '174', '203', '104', '105', '106', '107', '108', '109'] -%}border:solid 2px green;
+	{%- elseif anneeNaiss >= u12MaxYear and anneeNaiss < u10MaxYear and sexe == 'm' and discipline in ['104', '105', '106', '107', '108', '109', '124', '165'] -%}border:solid 2px green;
+	{%- endif -%}
+
+{% endspaceless %}
+{%- endmacro -%}
+
+
+{% macro convPoints(sexe, discipline, performance) %}
+{% spaceless %}
+
+	{% set tabelle = {
+		m:    { 
+			38: {
+				form: "1", a_wert: "8.05569", b_wert: "1300", c_wert: "2.5"
+			}, 
+			40: {
+				form: "1", a_wert: "6.30895", b_wert: "1460", c_wert: "2.5"
+			}, 
+			41: {
+				form: "1", a_wert: "3.80423", b_wert: "1820", c_wert: "2.5"
+			},
+			42: {
+				form: "1", a_wert: "7.080303", b_wert: "2150", c_wert: "2.1"
+			},
+			44: {
+				form: "1", a_wert: "1.31532", b_wert: "4567", c_wert: "2.1"
+			},
+			45: {
+				form: "1", a_wert: "0.492671", b_wert: "7295", c_wert: "2.1"
+			},
+			46: {
+				form: "1", a_wert: "0.249724", b_wert: "10082", c_wert: "2.1"
+			},
+			47: {
+				form: "3", a_wert: "0.086375", b_wert: "16833", c_wert: "2.1"
+			},
+			48: {
+				form: "3", a_wert: "0.042083", b_wert: "23537", c_wert: "2.1"
+			},
+			49: {
+				form: "3", a_wert: "0.0068251", b_wert: "32581", c_wert: "2.3"
+			}, 
+			50: {
+				form: "3", a_wert: "0.0024384", b_wert: "50965", c_wert: "2.3"
+			},
+			52: {
+				form: "3", a_wert: "0.0011358", b_wert: "71036", c_wert: "2.3"
+			},
+			53: {
+				form: "3", a_wert: "0.00041504", b_wert: "110024", c_wert: "2.3"
+			},
+			54: {
+				form: "3", a_wert: "0.00011812", b_wert: "189996", c_wert: "2.3"
+			},
+			55: {
+				form: "3", a_wert: "0.000021844", b_wert: "395879", c_wert: "2.3"
+			},
+			64: {
+				form: "1", a_wert: "14.460128", b_wert: "1459", c_wert: "2.1"
+			},
+			65: {
+				form: "1", a_wert: "14.460128", b_wert: "1459", c_wert: "2.1"
+			},
+			66: {
+				form: "1", a_wert: "14.460128", b_wert: "1459", c_wert: "2.1"
+			},
+			67: {
+				form: "1", a_wert: "14.460128", b_wert: "1459", c_wert: "2.1"
+			},
+			68: {
+				form: "1", a_wert: "14.460128", b_wert: "1459", c_wert: "2.1"
+			},
+			69: {
+				form: "1", a_wert: "10.294837", b_wert: "1688", c_wert: "2.1"
+			}, 
+			70: {
+				form: "1", a_wert: "10.294837", b_wert: "1688", c_wert: "2.1"
+			}, 
+			71: {
+				form: "1", a_wert: "10.294837", b_wert: "1688", c_wert: "2.1"
+			}, 
+			72: {
+				form: "1", a_wert: "10.294837", b_wert: "1688", c_wert: "2.1"
+			}, 
+			73: {
+				form: "1", a_wert: "10.294837", b_wert: "1688", c_wert: "2.1"
+			}, 
+			74: {
+				form: "1", a_wert: "5.925928", b_wert: "2231", c_wert: "2.1"
+			}, 
+			75: {
+				form: "1", a_wert: "3.82844", b_wert: "2747", c_wert: "2.1"
+			}, 
+			76: {
+				form: "1", a_wert: "3.82844", b_wert: "2747", c_wert: "2.1"
+			}, 
+			77: {
+				form: "1", a_wert: "3.174673", b_wert: "3003", c_wert: "2.1"
+			},
+			78: {
+				form: "1", a_wert: "3.174673", b_wert: "3003", c_wert: "2.1"
+			},
+			79: {
+				form: "1", a_wert: "3.174673", b_wert: "3003", c_wert: "2.1"
+			},
+			83: {
+				form: "1", a_wert: "0.211237", b_wert: "10921", c_wert: "2.1"
+			},
+			84: {
+				form: "1", a_wert: "0.211237", b_wert: "10921", c_wert: "2.1"
+			},
+			100: {
+				form: "2", a_wert: "732.15375", b_wert: "75", c_wert: "1"
+			}, 
+			102: {
+				form: "2", a_wert: "136.08157", b_wert: "130", c_wert: "1.1"
+			},
+			103: {
+				form: "2", a_wert: "86.950221", b_wert: "395", c_wert: "1.0"
+			}, 
+			104: {
+				form: "2", a_wert: "82.491673", b_wert: "178", c_wert: "0.9"
+			}, 
+			105: {
+				form: "2", a_wert: "82.491673", b_wert: "178", c_wert: "0.9"
+			}, 
+			106: {
+				form: "2", a_wert: "82.491673", b_wert: "178", c_wert: "0.9"
+			}, 
+			107: {
+				form: "2", a_wert: "82.491673", b_wert: "178", c_wert: "0.9"
+			},  
+			108: {
+				form: "2", a_wert: "82.491673", b_wert: "178", c_wert: "0.9"
+			}, 
+			109: {
+				form: "2", a_wert: "82.491673", b_wert: "178", c_wert: "0.9"
+			},
+			110: {
+				form: "2", a_wert: "28.891406", b_wert: "494", c_wert: "0.9"
+			},
+			111: {
+				form: "2", a_wert: "28.891406", b_wert: "494", c_wert: "0.9"
+			},
+			112: {
+				form: "2", a_wert: "28.891406", b_wert: "494", c_wert: "0.9"
+			},
+			113: {
+				form: "2", a_wert: "28.891406", b_wert: "494", c_wert: "0.9"
+			},
+			114: {
+				form: "2", a_wert: "28.891406", b_wert: "494", c_wert: "0.9"
+			},
+			115: {
+				form: "2", a_wert: "24.978132", b_wert: "581", c_wert: "0.9"
+			},
+			116: {
+				form: "2", a_wert: "24.978132", b_wert: "581", c_wert: "0.9"
+			},
+			117: {
+				form: "2", a_wert: "24.978132", b_wert: "581", c_wert: "0.9"
+			},
+			118: {
+				form: "2", a_wert: "24.978132", b_wert: "581", c_wert: "0.9"
+			},
+			119: {
+				form: "2", a_wert: "24.978132", b_wert: "581", c_wert: "0.9"
+			},
+			120: {
+				form: "2", a_wert: "23.247477", b_wert: "602", c_wert: "0.9"
+			}, 
+			121: {
+				form: "2", a_wert: "23.247477", b_wert: "602", c_wert: "0.9"
+			}, 
+			122: {
+				form: "2", a_wert: "23.247477", b_wert: "602", c_wert: "0.9"
+			}, 
+			123: {
+				form: "2", a_wert: "23.247477", b_wert: "602", c_wert: "0.9"
+			}, 
+			124: {
+				form: "2", a_wert: "19.191528", b_wert: "600", c_wert: "0.9"
+			}, 
+			165: {
+				form: "2", a_wert: "19.191528", b_wert: "600", c_wert: "0.9"
+			}, 
+			174: {
+				form: "2", a_wert: "23.247477", b_wert: "602", c_wert: "0.9"
+			}, 
+			203: {
+				form: "2", a_wert: "23.247477", b_wert: "602", c_wert: "0.9"
+			},
+		},
+		w: { 
+			40: {
+				form: "1", a_wert: "7.48676", b_wert: "1460", c_wert: "2.5"
+			}, 
+			41: {
+				form: "1", a_wert: "4.22443", b_wert: "1850", c_wert: "2.5"
+			},
+			49: {
+				form: "3", a_wert: "0.006914", b_wert: "34158", c_wert: "2.3"
+			}, 
+			69: {
+				form: "1", a_wert: "12.060698", b_wert: "1688", c_wert: "2.1"
+			}, 
+			70: {
+				form: "1", a_wert: "12.060698", b_wert: "1688", c_wert: "2.1"
+			}, 
+			71: {
+				form: "1", a_wert: "12.060698", b_wert: "1688", c_wert: "2.1"
+			}, 
+			72: {
+				form: "1", a_wert: "12.060698", b_wert: "1688", c_wert: "2.1"
+			}, 
+			73: {
+				form: "1", a_wert: "12.060698", b_wert: "1688", c_wert: "2.1"
+			}, 
+			74: {
+				form: "1", a_wert: "7.107482", b_wert: "2171", c_wert: "2.1"
+			}, 
+			75: {
+				form: "1", a_wert: "4.674232", b_wert: "2650", c_wert: "2.1"
+			}, 
+			76: {
+				form: "1", a_wert: "4.674232", b_wert: "2650", c_wert: "2.1"
+			}, 
+			100: {
+				form: "2", a_wert: "942.65514", b_wert: "75", c_wert: "1"
+			}, 
+			102: {
+				form: "2", a_wert: "171.91361", b_wert: "125", c_wert: "1.1"
+			}, 
+			104: {
+				form: "2", a_wert: "83.435373", b_wert: "130", c_wert: "0.9"
+			}, 
+			105: {
+				form: "2", a_wert: "83.435373", b_wert: "130", c_wert: "0.9"
+			}, 
+			106: {
+				form: "2", a_wert: "83.435373", b_wert: "130", c_wert: "0.9"
+			}, 
+			107: {
+				form: "2", a_wert: "83.435373", b_wert: "130", c_wert: "0.9"
+			},  
+			108: {
+				form: "2", a_wert: "83.435373", b_wert: "130", c_wert: "0.9"
+			}, 
+			109: {
+				form: "2", a_wert: "83.435373", b_wert: "130", c_wert: "0.9"
+			}, 
+			120: {
+				form: "2", a_wert: "28.058125", b_wert: "360", c_wert: "0.9"
+			}, 
+			121: {
+				form: "2", a_wert: "28.058125", b_wert: "360", c_wert: "0.9"
+			}, 
+			122: {
+				form: "2", a_wert: "28.058125", b_wert: "360", c_wert: "0.9"
+			}, 
+			123: {
+				form: "2", a_wert: "28.058125", b_wert: "360", c_wert: "0.9"
+			}, 
+			124: {
+				form: "2", a_wert: "24.63917", b_wert: "500", c_wert: "0.9"
+			}, 
+			165: {
+				form: "2", a_wert: "24.63917", b_wert: "500", c_wert: "0.9"
+			}, 
+			174: {
+				form: "2", a_wert: "28.058125", b_wert: "360", c_wert: "0.9"
+			}, 
+			203: {
+				form: "2", a_wert: "28.058125", b_wert: "360", c_wert: "0.9"
+			},
+		}
+	} %}
+	
+	{% if sexe == 'm' %}
+		{% set a = tabelle.m[discipline].a_wert %}
+		{% set b = tabelle.m[discipline].b_wert %}
+		{% set c = tabelle.m[discipline].c_wert %}
+		
+	{% elseif sexe == 'w' %}
+		{% set a = tabelle.w[discipline].a_wert %}
+		{% set b = tabelle.w[discipline].b_wert %}
+		{% set c = tabelle.w[discipline].c_wert %}
+	{% endif %}
+	
+	{#discipline in ['47', '48', '49', '50', '51', '52', '53', '54', '55']#}
+	{% if tabelle.w[discipline].form == 3 or tabelle.m[discipline].form == 3 %}
+	
+		{% set perf = performance|replace({':': '.'}) %}
+		{% set split = perf|split('.') %}
+		{% set minutes = split[0] %}
+		{% set secondes = split[1] %}
+		{% set centieme = split[2] %}
+	
+		{% if centieme %}
+			{% set perfSec = ((minutes)*6000)+((secondes)*100)+centieme %}
+		{% else %}
+			{% set perfSec = minutes~'.'~secondes %}
+		{% endif %}
+		
+		{{ (a*((b-perfSec)/100)**c)|round(0, 'floor')|number_format }}
+	{% elseif tabelle.w[discipline].form == 1 or tabelle.m[discipline].form == 1 %}
+		{{ (a*((b-100*performance)/100)**c)|round(0, 'floor')|number_format }}
+	{% else %}
+		{{ (a*((100*performance-b)/100)**c)|round(0, 'floor')|number_format }}
+	{% endif %}
+
+{% endspaceless %}
+{% endmacro %}
+
+{% macro perfToNumber(idDisc, performance) %}
+{% spaceless %}
+{% if idDisc in ['47', '48', '49', '50', '51', '52', '53', '54', '55'] %}
+	
+	{% set perf = performance|replace({':': '', '.': ''}) %}
+	{{perf}}
+{% else %}
+	{{performance}}
+{% endif %}
+{% endspaceless %}
+{% endmacro %}

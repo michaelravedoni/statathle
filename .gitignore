@@ -1,0 +1,118 @@
+#----------------------------------------------------------------------------
+# EMBER-CLI DEFAULT
+#----------------------------------------------------------------------------
+# See http://help.github.com/ignore-files/ for more about ignoring files.
+
+# compiled output
+/dist
+/tmp
+
+# dependencies
+/node_modules
+/bower_components
+
+# misc
+/.sass-cache
+/connect.lock
+/coverage/*
+/libpeerconnection.log
+npm-debug.log
+testem.log
+
+#----------------------------------------------------------------------------
+# MISC
+#----------------------------------------------------------------------------
+.*cache
+*.log
+cache/*
+backup
+_files
+log
+log/**/*
+.monitor
+Forwardfile
+
+# OS X Files
+.DS_Store
+Thumbs.db
+*.swp
+*.swo
+*.lnk
+*~
+
+# IDE FILES
+*.sublime-*
+*.tmproj
+
+# BOWER & BUILD TOOLS
+/build/*
+/bower_components/*
+
+# SASS
+*.sassc
+
+# ZEUS
+zeus.json
+custom_plan.rb
+
+# NODE
+.node_modules
+node_modules
+*/node_modules
+/node_modules/*
+
+# SYMFONY
+/web/bundles/
+/app/bootstrap*
+/app/cache/*
+/app/logs/*
+/vendor/
+/app/config/parameters.yml
+composer.phar
+
+# DRUPAL
+sites/*/settings*.php
+sites/*/files
+sites/*/private
+
+#----------------------------------------------------------------------------
+# Suite
+#----------------------------------------------------------------------------
+# https://www.leeboonstra.com/developer/remove-ds_store-files-from-my-git-repo-and-ignore-them/ #
+
+/.buildpath
+/build/
+*/archive/
+
+__MACOSX
+.DS_Store
+
+.project
+.settings
+.classpath
+.sass-cache/
+
+# OS generated files #
+######################
+*/.DS_Store
+.DS_Store
+.DS_Store?
+._*
+.Spotlight-V100
+.Trashes
+Icon?
+ehthumbs.db
+Thumbs.db
+
+# Packages #
+############
+# it's better to unpack these files and commit the raw source
+# git has its own built in compression methods
+*.7z
+*.dmg
+*.gz
+*.iso
+*.jar
+*.rar
+*.tar
+*.zip

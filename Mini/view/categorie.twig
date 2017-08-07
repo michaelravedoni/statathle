@@ -1,0 +1,331 @@
+{% extends "_base.twig" %}
+{% import '_macros.twig' as macros %}
+{% set title = "Résultats " ~ annee ~ " des " ~ categorie %}
+
+{% block content %}
+<style>
+.discipline-header{font-size:65%; min-width: 50px;}
+.input-limites{width:40px;}
+.ca-highlight{background-color:#D0F8BB;}
+.ca-highlight-6{background-color:#bbd0f8;}
+.ca-highlight-supp{background-color:#FFD282;}
+.ca-highlight-no{background-color:transparent;}
+.ca-carre-legende{border:solid 1px black;width:10px;height:10px;display:inline-block;}
+</style>
+<div class="ui container" style="overflow-x:scroll;">
+	<h1>Résultats {{annee}} des {{ categorie|replace({'u': 'U'}) }}</h1>
+	<p>Année : {{annee}} / Catégorie : {{ categorie|replace({'u': 'U'}) }} ({{anneeAthlMin}} - {{anneeAthlMax}}) / Plage : Du {{dateMin|date('d.m.Y')}} au {{dateMax|date('d.m.Y')}}</p>
+	<p>1. Année : <a href="{{baseUrl}}categories/2016/{{categorie}}">2016</a> - <a href="{{baseUrl}}categories/2017/{{categorie}}">2017</a></p>
+	<p>2. Catégorie : <a href="{{baseUrl}}categories/{{annee}}/all">Tous</a> - <a href="{{baseUrl}}categories/{{annee}}/u23">U23</a> - <a href="{{baseUrl}}categories/{{annee}}/u20">U20</a> - <a href="{{baseUrl}}categories/{{annee}}/u18">U18</a> - <a href="{{baseUrl}}categories/{{annee}}/u16">U16</a> - <a href="{{baseUrl}}categories/{{annee}}/u14">U14</a> - <a href="{{baseUrl}}categories/{{annee}}/u12">U12</a> - <a href="{{baseUrl}}categories/{{annee}}/u10">U10</a></p>
+	<p>3. Plage : <a href="?">Année entière</a> - <a href="?indoor=1">Indoor</a> - <a href="?indoor=0">Outdor</a> - <a href="?minimas=1">Limites ({{annee-1}}-{{annee}})</a></p>
+	{% if categorie != "all" %}
+	<p>4. Limites : Vous pouvez entrer manuellement la limite désirée dans la champ de chaque colonne de discipline ou alors utiliser les boutons ci-dessous pour remplir automatiquement les champs. Pour l'instant seuls les limites U16 sont disponibles automatiquement : voir les <a href="http://www.swiss-athletics.ch/fr/meisterschaften/championnats-2012.html">limites suisses</a> pour les rentrer manuellement.</p>
+	<div class="ui centered padded stackable grid">
+		<div class="eight wide column">
+			<span class="ca-carre-legende ca-highlight"></span> : Limite atteinte <br />
+			<span class="ca-carre-legende ca-highlight-6"></span> : Limite à atteindre <br />
+			<span class="ca-carre-legende ca-highlight-supp"></span> : Limite supplémentaire, consulter le <a href="http://www.swiss-athletics.ch/fr/meisterschaften/championnats-2012.html">tableau officiel</a> <br />
+			CS : Championnats suisses <br />
+			CSS : Championnats suisses en salle <br />
+		</div>
+		<div class="eight wide column">
+			<div class="ui buttons">
+				<a id="cs-{{categorie}}-m" class="limites-button ui mini primary basic button">{{categorie}}M</a> 
+				<div class="or" data-text="CS"></div>
+				<a id="cs-{{categorie}}-w" class="limites-button ui mini negative basic button">{{categorie}}W</a>
+			</div>
+			<span style="margin-left:40px;"></span>
+			<div class="ui buttons">
+				<a id="css-{{categorie}}-m" class="limites-button ui mini primary basic button">{{categorie}}M</a> 
+				<div class="or" data-text="CSS"></div>
+				<a id="css-{{categorie}}-w" class="limites-button ui mini negative basic button">{{categorie}}W</a>
+			</div>
+		</div>
+	</div>
+	{% endif %}
+	
+	<table id="results-table" class="ca-table resultats">
+		<thead>
+			<tr class="title-row">
+				<th>Date</th>
+				<th>Sexe</th>
+				<th>Nom</th>
+				{% for disc in disciplines %}
+				<th class="discipline-header">{{disc.nom_d}}</th>
+				{% endfor %}
+			</tr>
+		</thead>
+		<tbody>
+			<tr id="minimas-input">
+				<td><button id="limites-reset" class="ui mini basic button">Reset</button></td>
+				<td></td>
+				<td>Limites</td>
+				{% for disc in disciplines %}
+				<td><input type="" name="limites" value="" id="disc-{{disc.id_d}}" class="input-limites"/></td>
+				{% endfor %}
+			</tr>
+			{% for item in athletes %}
+			<tr class="{{item.id_a}} {{item.sexe_a}}">
+				<td id="date" class="date" data-date="{{ item.date_a|date('Y-m-d') }}">{{ item.date_a|date('d.m.Y') }}</td>
+				<td id="date" class="sexe">{{ item.sexe_a }}</td>
+				<td><a href="{{baseUrl}}athletes/{{ item.id_a }}">{{ item.nom_a }} {{ item.prenom_a }}</a></td>
+				{% for disc in disciplines %}
+				{% set discId = disc.id_d %}
+				<td class="">
+					<span class="{{disc.id_d}}" data-points="{{ macros.convPoints(item.sexe_a, disc.id_d, attribute(item, discId)) }}" data-perf="{{ macros.perfToNumber(disc.id_d, attribute(item, discId)) }}">{{ attribute(item, discId) }}</span>
+				</td>
+				<script>
+				$(document).ready(function() {
+					$('#disc-{{disc.id_d}}').on('keyup click code-change', function() {
+						$('.{{disc.id_d}}').each(function() {
+							var limite = +$("#disc-{{disc.id_d}}").val();
+							var limite6 = limite-(limite*0.06);
+							var limite6Asc = limite+(limite*0.06);
+							
+							if ("{{disc.tri_d}}" == "ASC" && +$(this).attr( "data-perf" ) <= +$("#disc-{{disc.id_d}}").val() && +$(this).attr( "data-perf" ) !=0 ) {
+								$(this).closest("td").addClass("ca-highlight");
+							} else if ("{{disc.tri_d}}" == "DESC" && +$(this).text() >= +$("#disc-{{disc.id_d}}").val() && +$("#disc-{{disc.id_d}}").val() != 0) {
+								$(this).closest("td").addClass("ca-highlight");
+							} else if ("{{disc.tri_d}}" == "ASC" && +$(this).attr( "data-perf" ) <= limite6Asc && +$(this).attr( "data-perf" ) !=0) {
+								$(this).closest("td").addClass("ca-highlight-6");
+							} else if ("{{disc.tri_d}}" == "DESC" && +$(this).text() >= limite6 && +$("#disc-{{disc.id_d}}").val() != 0) {
+								$(this).closest("td").addClass("ca-highlight-6");
+							} else {
+								$(this).closest("td").addClass("ca-highlight-no");
+							}
+						});
+					});
+				});
+				</script>
+				{% endfor %}
+			</tr>
+			{% endfor %}
+		</tbody>
+	</table>
+</div>
+
+<script>
+
+var dataLimites = [{"comp":"css","sexe":"m","categorie":"u16","id_d":38,"nom_d":"","tri_d":"","supp":1,"limite":6.80},
+{"comp":"css","sexe":"m","categorie":"u16","id_d":40,"nom_d":"","tri_d":"","supp":0,"limite":7.90},
+{"comp":"css","sexe":"m","categorie":"u16","id_d":41,"nom_d":"","tri_d":"","supp":1,"limite":10.00},
+{"comp":"css","sexe":"m","categorie":"u16","id_d":42,"nom_d":"","tri_d":"","supp":0,"limite":null},
+{"comp":"css","sexe":"m","categorie":"u16","id_d":44,"nom_d":"","tri_d":"","supp":1,"limite":null},
+{"comp":"css","sexe":"m","categorie":"u16","id_d":46,"nom_d":"","tri_d":"","supp":0,"limite":null},
+{"comp":"css","sexe":"m","categorie":"u16","id_d":47,"nom_d":"","tri_d":"","supp":1,"limite":13800},
+{"comp":"css","sexe":"m","categorie":"u16","id_d":48,"nom_d":"","tri_d":"","supp":1,"limite":null},
+{"comp":"css","sexe":"m","categorie":"u16","id_d":49,"nom_d":"","tri_d":"","supp":1,"limite":30400},
+{"comp":"css","sexe":"m","categorie":"u16","id_d":50,"nom_d":"","tri_d":"","supp":1,"limite":null},
+{"comp":"css","sexe":"m","categorie":"u16","id_d":52,"nom_d":"","tri_d":"","supp":1,"limite":6400},
+{"comp":"css","sexe":"m","categorie":"u16","id_d":67,"nom_d":"","tri_d":"","supp":1,"limite":8.60},
+{"comp":"css","sexe":"m","categorie":"u16","id_d":72,"nom_d":"","tri_d":"","supp":0,"limite":9.80},
+{"comp":"css","sexe":"m","categorie":"u16","id_d":74,"nom_d":"","tri_d":"","supp":1,"limite":13.50},
+{"comp":"css","sexe":"m","categorie":"u16","id_d":75,"nom_d":"","tri_d":"","supp":1,"limite":15.50},
+{"comp":"css","sexe":"m","categorie":"u16","id_d":100,"nom_d":"","tri_d":"","supp":0,"limite":1.70},
+{"comp":"css","sexe":"m","categorie":"u16","id_d":101,"nom_d":"","tri_d":"","supp":0,"limite":2.60},
+{"comp":"css","sexe":"m","categorie":"u16","id_d":102,"nom_d":"","tri_d":"","supp":0,"limite":5.50},
+{"comp":"css","sexe":"m","categorie":"u16","id_d":186,"nom_d":"","tri_d":"","supp":1,"limite":5.70},
+{"comp":"css","sexe":"m","categorie":"u16","id_d":103,"nom_d":"","tri_d":"","supp":0,"limite":10.50},
+{"comp":"css","sexe":"m","categorie":"u16","id_d":108,"nom_d":"","tri_d":"","supp":1,"limite":12.20},
+{"comp":"css","sexe":"m","categorie":"u16","id_d":107,"nom_d":"","tri_d":"","supp":0,"limite":11.80},
+{"comp":"css","sexe":"w","categorie":"u16","id_d":38,"nom_d":"","tri_d":"","supp":1,"limite":7.40},
+{"comp":"css","sexe":"w","categorie":"u16","id_d":40,"nom_d":"","tri_d":"","supp":0,"limite":8.45},
+{"comp":"css","sexe":"w","categorie":"u16","id_d":41,"nom_d":"","tri_d":"","supp":1,"limite":10.60},
+{"comp":"css","sexe":"w","categorie":"u16","id_d":47,"nom_d":"","tri_d":"","supp":1,"limite":14400},
+{"comp":"css","sexe":"w","categorie":"u16","id_d":49,"nom_d":"","tri_d":"","supp":0,"limite":31700},
+{"comp":"css","sexe":"w","categorie":"u16","id_d":52,"nom_d":"","tri_d":"","supp":1,"limite":72300},
+{"comp":"css","sexe":"w","categorie":"u16","id_d":187,"nom_d":"","tri_d":"","supp":null,"limite":8.80},
+{"comp":"css","sexe":"w","categorie":"u16","id_d":190,"nom_d":"","tri_d":"","supp":null,"limite":10.00},
+{"comp":"css","sexe":"w","categorie":"u16","id_d":74,"nom_d":"","tri_d":"","supp":1,"limite":13.00},
+{"comp":"css","sexe":"w","categorie":"u16","id_d":100,"nom_d":"","tri_d":"","supp":0,"limite":1.55},
+{"comp":"css","sexe":"w","categorie":"u16","id_d":101,"nom_d":"","tri_d":"","supp":0,"limite":2.40},
+{"comp":"css","sexe":"w","categorie":"u16","id_d":102,"nom_d":"","tri_d":"","supp":0,"limite":5.00},
+{"comp":"css","sexe":"w","categorie":"u16","id_d":186,"nom_d":"","tri_d":"","supp":1,"limite":5.20},
+{"comp":"css","sexe":"w","categorie":"u16","id_d":103,"nom_d":"","tri_d":"","supp":0,"limite":9.70},
+{"comp":"css","sexe":"w","categorie":"u16","id_d":108,"nom_d":"","tri_d":"","supp":0,"limite":10.50},
+{"comp":"cs","sexe":"m","categorie":"u16","id_d":38,"nom_d":"50 m","tri_d":"ASC","supp":null,"limite":null},
+{"comp":"cs","sexe":"m","categorie":"u16","id_d":40,"nom_d":"60 m","tri_d":"ASC","supp":null,"limite":null},
+{"comp":"cs","sexe":"m","categorie":"u16","id_d":41,"nom_d":"80 m","tri_d":"ASC","supp":0,"limite":9.90},
+{"comp":"cs","sexe":"m","categorie":"u16","id_d":42,"nom_d":"100 m","tri_d":"ASC","supp":null,"limite":null},
+{"comp":"cs","sexe":"m","categorie":"u16","id_d":44,"nom_d":"200 m","tri_d":"ASC","supp":null,"limite":null},
+{"comp":"cs","sexe":"m","categorie":"u16","id_d":46,"nom_d":"400 m","tri_d":"ASC","supp":null,"limite":null},
+{"comp":"cs","sexe":"m","categorie":"u16","id_d":47,"nom_d":"600 m","tri_d":"ASC","supp":0,"limite":13400},
+{"comp":"cs","sexe":"m","categorie":"u16","id_d":48,"nom_d":"800 m","tri_d":"ASC","supp":null,"limite":null},
+{"comp":"cs","sexe":"m","categorie":"u16","id_d":49,"nom_d":"1000 m","tri_d":"ASC","supp":1,"limite":25200},
+{"comp":"cs","sexe":"m","categorie":"u16","id_d":50,"nom_d":"1500 m","tri_d":"ASC","supp":null,"limite":null},
+{"comp":"cs","sexe":"m","categorie":"u16","id_d":52,"nom_d":"2000 m","tri_d":"ASC","supp":0,"limite":63000},
+{"comp":"cs","sexe":"m","categorie":"u16","id_d":53,"nom_d":"3000 m","tri_d":"ASC","supp":1,"limite":103000},
+{"comp":"cs","sexe":"m","categorie":"u16","id_d":54,"nom_d":"5000 m","tri_d":"ASC","supp":null,"limite":null},
+{"comp":"cs","sexe":"m","categorie":"u16","id_d":55,"nom_d":"10 000 m","tri_d":"ASC","supp":null,"limite":null},
+{"comp":"cs","sexe":"m","categorie":"u16","id_d":64,"nom_d":"50 m haies 106.7","tri_d":"ASC","supp":null,"limite":null},
+{"comp":"cs","sexe":"m","categorie":"u16","id_d":65,"nom_d":"50 m haies 99.1","tri_d":"ASC","supp":null,"limite":null},
+{"comp":"cs","sexe":"m","categorie":"u16","id_d":66,"nom_d":"50 m haies 91.4","tri_d":"ASC","supp":null,"limite":null},
+{"comp":"cs","sexe":"m","categorie":"u16","id_d":67,"nom_d":"50 m haies 84.0","tri_d":"ASC","supp":null,"limite":null},
+{"comp":"cs","sexe":"m","categorie":"u16","id_d":68,"nom_d":"50 m haies 76.2  U18 W","tri_d":"ASC","supp":null,"limite":null},
+{"comp":"cs","sexe":"m","categorie":"u16","id_d":69,"nom_d":"60 m haies 106.7","tri_d":"ASC","supp":null,"limite":null},
+{"comp":"cs","sexe":"m","categorie":"u16","id_d":70,"nom_d":"60 m haies 99.1","tri_d":"ASC","supp":null,"limite":null},
+{"comp":"cs","sexe":"m","categorie":"u16","id_d":71,"nom_d":"60 m haies 91.4","tri_d":"ASC","supp":null,"limite":null},
+{"comp":"cs","sexe":"m","categorie":"u16","id_d":72,"nom_d":"60 m haies 84.0","tri_d":"ASC","supp":null,"limite":null},
+{"comp":"cs","sexe":"m","categorie":"u16","id_d":73,"nom_d":"60 m haies 76.2  U18 W","tri_d":"ASC","supp":null,"limite":null},
+{"comp":"cs","sexe":"m","categorie":"u16","id_d":74,"nom_d":"80 m haies 76.2","tri_d":"ASC","supp":null,"limite":null},
+{"comp":"cs","sexe":"m","categorie":"u16","id_d":75,"nom_d":"100 m haies 84.0","tri_d":"ASC","supp":0,"limite":15.60},
+{"comp":"cs","sexe":"m","categorie":"u16","id_d":76,"nom_d":"100 m haies 76.2","tri_d":"ASC","supp":0,"limite":15.60},
+{"comp":"cs","sexe":"m","categorie":"u16","id_d":77,"nom_d":"110 m haies 106.7","tri_d":"ASC","supp":null,"limite":null},
+{"comp":"cs","sexe":"m","categorie":"u16","id_d":78,"nom_d":"110 m haies 99.1","tri_d":"ASC","supp":null,"limite":null},
+{"comp":"cs","sexe":"m","categorie":"u16","id_d":79,"nom_d":"110 m haies 91.4","tri_d":"ASC","supp":null,"limite":null},
+{"comp":"cs","sexe":"m","categorie":"u16","id_d":80,"nom_d":"200 m haies","tri_d":"ASC","supp":null,"limite":null},
+{"comp":"cs","sexe":"m","categorie":"u16","id_d":81,"nom_d":"300 m haies 84.0","tri_d":"ASC","supp":null,"limite":null},
+{"comp":"cs","sexe":"m","categorie":"u16","id_d":82,"nom_d":"300 m haies 76.2","tri_d":"ASC","supp":null,"limite":null},
+{"comp":"cs","sexe":"m","categorie":"u16","id_d":83,"nom_d":"400 m haies 91.4","tri_d":"ASC","supp":null,"limite":null},
+{"comp":"cs","sexe":"m","categorie":"u16","id_d":84,"nom_d":"400 m haies 76.2","tri_d":"ASC","supp":null,"limite":null},
+{"comp":"cs","sexe":"m","categorie":"u16","id_d":100,"nom_d":"Hauteur","tri_d":"DESC","supp":0,"limite":1.70},
+{"comp":"cs","sexe":"m","categorie":"u16","id_d":101,"nom_d":"Perche","tri_d":"DESC","supp":0,"limite":3.00},
+{"comp":"cs","sexe":"m","categorie":"u16","id_d":102,"nom_d":"Longueur","tri_d":"DESC","supp":0,"limite":5.70},
+{"comp":"cs","sexe":"m","categorie":"u16","id_d":103,"nom_d":"Triple","tri_d":"DESC","supp":0,"limite":11.00},
+{"comp":"cs","sexe":"m","categorie":"u16","id_d":104,"nom_d":"Poids 7.26 kg","tri_d":"DESC","supp":null,"limite":null},
+{"comp":"cs","sexe":"m","categorie":"u16","id_d":105,"nom_d":"Poids 6.00 kg","tri_d":"DESC","supp":null,"limite":null},
+{"comp":"cs","sexe":"m","categorie":"u16","id_d":106,"nom_d":"Poids 5.00 kg","tri_d":"DESC","supp":null,"limite":null},
+{"comp":"cs","sexe":"m","categorie":"u16","id_d":107,"nom_d":"Poids 4.00 kg","tri_d":"DESC","supp":0,"limite":12.50},
+{"comp":"cs","sexe":"m","categorie":"u16","id_d":108,"nom_d":"Poids 3.00 kg","tri_d":"DESC","supp":1,"limite":12.50},
+{"comp":"cs","sexe":"m","categorie":"u16","id_d":109,"nom_d":"Poids 2.50 kg","tri_d":"DESC","supp":null,"limite":null},
+{"comp":"cs","sexe":"m","categorie":"u16","id_d":110,"nom_d":"Disque 2.00 kg","tri_d":"DESC","supp":null,"limite":null},
+{"comp":"cs","sexe":"m","categorie":"u16","id_d":111,"nom_d":"Disque 1.75 kg","tri_d":"DESC","supp":null,"limite":null},
+{"comp":"cs","sexe":"m","categorie":"u16","id_d":112,"nom_d":"Disque 1.50 kg","tri_d":"DESC","supp":null,"limite":null},
+{"comp":"cs","sexe":"m","categorie":"u16","id_d":113,"nom_d":"Disque 1.00 kg","tri_d":"DESC","supp":0,"limite":36.00},
+{"comp":"cs","sexe":"m","categorie":"u16","id_d":114,"nom_d":"Disque 0.75 kg","tri_d":"DESC","supp":null,"limite":null},
+{"comp":"cs","sexe":"m","categorie":"u16","id_d":115,"nom_d":"Marteau 7.26 kg","tri_d":"DESC","supp":null,"limite":null},
+{"comp":"cs","sexe":"m","categorie":"u16","id_d":116,"nom_d":"Marteau 6.00 kg","tri_d":"DESC","supp":null,"limite":null},
+{"comp":"cs","sexe":"m","categorie":"u16","id_d":117,"nom_d":"Marteau 5.00 kg","tri_d":"DESC","supp":null,"limite":null},
+{"comp":"cs","sexe":"m","categorie":"u16","id_d":118,"nom_d":"Marteau 4.00 kg","tri_d":"DESC","supp":0,"limite":30.00},
+{"comp":"cs","sexe":"m","categorie":"u16","id_d":119,"nom_d":"Marteau 3.00 kg","tri_d":"DESC","supp":null,"limite":null},
+{"comp":"cs","sexe":"m","categorie":"u16","id_d":120,"nom_d":"Javelot 800 gr","tri_d":"DESC","supp":null,"limite":null},
+{"comp":"cs","sexe":"m","categorie":"u16","id_d":121,"nom_d":"Javelot 700 gr","tri_d":"DESC","supp":null,"limite":null},
+{"comp":"cs","sexe":"m","categorie":"u16","id_d":122,"nom_d":"Javelot 600 gr","tri_d":"DESC","supp":0,"limite":43.00},
+{"comp":"cs","sexe":"m","categorie":"u16","id_d":123,"nom_d":"Javelot 400 gr","tri_d":"DESC","supp":null,"limite":null},
+{"comp":"cs","sexe":"w","categorie":"u16","id_d":38,"nom_d":"50 m","tri_d":"ASC","supp":null,"limite":null},
+{"comp":"cs","sexe":"w","categorie":"u16","id_d":40,"nom_d":"60 m","tri_d":"ASC","supp":null,"limite":null},
+{"comp":"cs","sexe":"w","categorie":"u16","id_d":41,"nom_d":"80 m","tri_d":"ASC","supp":0,"limite":10.60},
+{"comp":"cs","sexe":"w","categorie":"u16","id_d":42,"nom_d":"100 m","tri_d":"ASC","supp":null,"limite":null},
+{"comp":"cs","sexe":"w","categorie":"u16","id_d":44,"nom_d":"200 m","tri_d":"ASC","supp":null,"limite":null},
+{"comp":"cs","sexe":"w","categorie":"u16","id_d":46,"nom_d":"400 m","tri_d":"ASC","supp":null,"limite":null},
+{"comp":"cs","sexe":"w","categorie":"u16","id_d":47,"nom_d":"600 m","tri_d":"ASC","supp":0,"limite":14300},
+{"comp":"cs","sexe":"w","categorie":"u16","id_d":48,"nom_d":"800 m","tri_d":"ASC","supp":null,"limite":null},
+{"comp":"cs","sexe":"w","categorie":"u16","id_d":49,"nom_d":"1000 m","tri_d":"ASC","supp":1,"limite":30900},
+{"comp":"cs","sexe":"w","categorie":"u16","id_d":50,"nom_d":"1500 m","tri_d":"ASC","supp":null,"limite":null},
+{"comp":"cs","sexe":"w","categorie":"u16","id_d":52,"nom_d":"2000 m","tri_d":"ASC","supp":0,"limite":71000},
+{"comp":"cs","sexe":"w","categorie":"u16","id_d":53,"nom_d":"3000 m","tri_d":"ASC","supp":1,"limite":120000},
+{"comp":"cs","sexe":"w","categorie":"u16","id_d":54,"nom_d":"5000 m","tri_d":"ASC","supp":null,"limite":null},
+{"comp":"cs","sexe":"w","categorie":"u16","id_d":55,"nom_d":"10 000 m","tri_d":"ASC","supp":null,"limite":null},
+{"comp":"cs","sexe":"w","categorie":"u16","id_d":64,"nom_d":"50 m haies 106.7","tri_d":"ASC","supp":null,"limite":null},
+{"comp":"cs","sexe":"w","categorie":"u16","id_d":65,"nom_d":"50 m haies 99.1","tri_d":"ASC","supp":null,"limite":null},
+{"comp":"cs","sexe":"w","categorie":"u16","id_d":66,"nom_d":"50 m haies 91.4","tri_d":"ASC","supp":null,"limite":null},
+{"comp":"cs","sexe":"w","categorie":"u16","id_d":67,"nom_d":"50 m haies 84.0","tri_d":"ASC","supp":null,"limite":null},
+{"comp":"cs","sexe":"w","categorie":"u16","id_d":68,"nom_d":"50 m haies 76.2  U18 W","tri_d":"ASC","supp":null,"limite":null},
+{"comp":"cs","sexe":"w","categorie":"u16","id_d":69,"nom_d":"60 m haies 106.7","tri_d":"ASC","supp":null,"limite":null},
+{"comp":"cs","sexe":"w","categorie":"u16","id_d":70,"nom_d":"60 m haies 99.1","tri_d":"ASC","supp":null,"limite":null},
+{"comp":"cs","sexe":"w","categorie":"u16","id_d":71,"nom_d":"60 m haies 91.4","tri_d":"ASC","supp":null,"limite":null},
+{"comp":"cs","sexe":"w","categorie":"u16","id_d":72,"nom_d":"60 m haies 84.0","tri_d":"ASC","supp":null,"limite":null},
+{"comp":"cs","sexe":"w","categorie":"u16","id_d":73,"nom_d":"60 m haies 76.2  U18 W","tri_d":"ASC","supp":null,"limite":null},
+{"comp":"cs","sexe":"w","categorie":"u16","id_d":74,"nom_d":"80 m haies 76.2","tri_d":"ASC","supp":0,"limite":13.20},
+{"comp":"cs","sexe":"w","categorie":"u16","id_d":75,"nom_d":"100 m haies 84.0","tri_d":"ASC","supp":null,"limite":null},
+{"comp":"cs","sexe":"w","categorie":"u16","id_d":76,"nom_d":"100 m haies 76.2","tri_d":"ASC","supp":null,"limite":null},
+{"comp":"cs","sexe":"w","categorie":"u16","id_d":77,"nom_d":"110 m haies 106.7","tri_d":"ASC","supp":null,"limite":null},
+{"comp":"cs","sexe":"w","categorie":"u16","id_d":78,"nom_d":"110 m haies 99.1","tri_d":"ASC","supp":null,"limite":null},
+{"comp":"cs","sexe":"w","categorie":"u16","id_d":79,"nom_d":"110 m haies 91.4","tri_d":"ASC","supp":null,"limite":null},
+{"comp":"cs","sexe":"w","categorie":"u16","id_d":80,"nom_d":"200 m haies","tri_d":"ASC","supp":null,"limite":null},
+{"comp":"cs","sexe":"w","categorie":"u16","id_d":81,"nom_d":"300 m haies 84.0","tri_d":"ASC","supp":null,"limite":null},
+{"comp":"cs","sexe":"w","categorie":"u16","id_d":82,"nom_d":"300 m haies 76.2","tri_d":"ASC","supp":null,"limite":null},
+{"comp":"cs","sexe":"w","categorie":"u16","id_d":83,"nom_d":"400 m haies 91.4","tri_d":"ASC","supp":null,"limite":null},
+{"comp":"cs","sexe":"w","categorie":"u16","id_d":84,"nom_d":"400 m haies 76.2","tri_d":"ASC","supp":null,"limite":null},
+{"comp":"cs","sexe":"w","categorie":"u16","id_d":100,"nom_d":"Hauteur","tri_d":"DESC","supp":0,"limite":1.55},
+{"comp":"cs","sexe":"w","categorie":"u16","id_d":101,"nom_d":"Perche","tri_d":"DESC","supp":null,"limite":2.40},
+{"comp":"cs","sexe":"w","categorie":"u16","id_d":102,"nom_d":"Longueur","tri_d":"DESC","supp":null,"limite":5.20},
+{"comp":"cs","sexe":"w","categorie":"u16","id_d":103,"nom_d":"Triple","tri_d":"DESC","supp":null,"limite":9.60},
+{"comp":"cs","sexe":"w","categorie":"u16","id_d":104,"nom_d":"Poids 7.26 kg","tri_d":"DESC","supp":null,"limite":null},
+{"comp":"cs","sexe":"w","categorie":"u16","id_d":105,"nom_d":"Poids 6.00 kg","tri_d":"DESC","supp":null,"limite":null},
+{"comp":"cs","sexe":"w","categorie":"u16","id_d":106,"nom_d":"Poids 5.00 kg","tri_d":"DESC","supp":null,"limite":null},
+{"comp":"cs","sexe":"w","categorie":"u16","id_d":107,"nom_d":"Poids 4.00 kg","tri_d":"DESC","supp":null,"limite":null},
+{"comp":"cs","sexe":"w","categorie":"u16","id_d":108,"nom_d":"Poids 3.00 kg","tri_d":"DESC","supp":null,"limite":10.60},
+{"comp":"cs","sexe":"w","categorie":"u16","id_d":109,"nom_d":"Poids 2.50 kg","tri_d":"DESC","supp":null,"limite":null},
+{"comp":"cs","sexe":"w","categorie":"u16","id_d":110,"nom_d":"Disque 2.00 kg","tri_d":"DESC","supp":null,"limite":null},
+{"comp":"cs","sexe":"w","categorie":"u16","id_d":111,"nom_d":"Disque 1.75 kg","tri_d":"DESC","supp":null,"limite":null},
+{"comp":"cs","sexe":"w","categorie":"u16","id_d":112,"nom_d":"Disque 1.50 kg","tri_d":"DESC","supp":null,"limite":null},
+{"comp":"cs","sexe":"w","categorie":"u16","id_d":113,"nom_d":"Disque 1.00 kg","tri_d":"DESC","supp":null,"limite":null},
+{"comp":"cs","sexe":"w","categorie":"u16","id_d":114,"nom_d":"Disque 0.75 kg","tri_d":"DESC","supp":null,"limite":28.00},
+{"comp":"cs","sexe":"w","categorie":"u16","id_d":115,"nom_d":"Marteau 7.26 kg","tri_d":"DESC","supp":null,"limite":null},
+{"comp":"cs","sexe":"w","categorie":"u16","id_d":116,"nom_d":"Marteau 6.00 kg","tri_d":"DESC","supp":null,"limite":null},
+{"comp":"cs","sexe":"w","categorie":"u16","id_d":117,"nom_d":"Marteau 5.00 kg","tri_d":"DESC","supp":null,"limite":null},
+{"comp":"cs","sexe":"w","categorie":"u16","id_d":118,"nom_d":"Marteau 4.00 kg","tri_d":"DESC","supp":null,"limite":null},
+{"comp":"cs","sexe":"w","categorie":"u16","id_d":119,"nom_d":"Marteau 3.00 kg","tri_d":"DESC","supp":null,"limite":22.00},
+{"comp":"cs","sexe":"w","categorie":"u16","id_d":120,"nom_d":"Javelot 800 gr","tri_d":"DESC","supp":null,"limite":null},
+{"comp":"cs","sexe":"w","categorie":"u16","id_d":121,"nom_d":"Javelot 700 gr","tri_d":"DESC","supp":null,"limite":null},
+{"comp":"cs","sexe":"w","categorie":"u16","id_d":122,"nom_d":"Javelot 600 gr","tri_d":"DESC","supp":null,"limite":null},
+{"comp":"cs","sexe":"w","categorie":"u16","id_d":123,"nom_d":"Javelot 400 gr","tri_d":"DESC","supp":null,"limite":37.00}]
+
+$("#cs-{{categorie}}-m").click(function () {
+	for (var item in dataLimites) {
+		if (dataLimites.hasOwnProperty(item)) {
+			if (dataLimites[item].categorie == "{{categorie}}" && dataLimites[item].sexe == "m"  && dataLimites[item].comp == "cs") {
+				$("#disc-"+ dataLimites[item].id_d).val(dataLimites[item].limite).trigger("code-change");
+			}
+		}
+	}
+	$(".w").hide();
+	$(".m").show();
+});
+$("#cs-{{categorie}}-w").click(function () {
+	for (var item in dataLimites) {
+		if (dataLimites.hasOwnProperty(item)) {
+			if (dataLimites[item].categorie == "{{categorie}}" && dataLimites[item].sexe == "w"  && dataLimites[item].comp == "cs") {
+				$("#disc-"+ dataLimites[item].id_d).val(dataLimites[item].limite).trigger("code-change");
+			}
+		}
+	}
+	$(".m").hide();
+	$(".w").show();
+});
+$("#css-{{categorie}}-m").click(function () {
+	for (var item in dataLimites) {
+		if (dataLimites.hasOwnProperty(item)) {
+			if (dataLimites[item].categorie == "{{categorie}}" && dataLimites[item].sexe == "m"  && dataLimites[item].comp == "css") {
+				$("#disc-"+ dataLimites[item].id_d).val(dataLimites[item].limite).trigger("code-change");
+			}
+		}
+	}
+	$(".w").hide();
+	$(".m").show();
+});
+$("#css-{{categorie}}-w").click(function () {
+	for (var item in dataLimites) {
+		if (dataLimites.hasOwnProperty(item)) {
+			if (dataLimites[item].categorie == "{{categorie}}" && dataLimites[item].sexe == "w"  && dataLimites[item].comp == "css") {
+				$("#disc-"+ dataLimites[item].id_d).val(dataLimites[item].limite).trigger("code-change");
+			}
+		}
+	}
+	$(".m").hide();
+	$(".w").show();
+});
+// limites supplémentaires
+$('.limites-button').on('click', function() {
+	for (var item in dataLimites) {
+		if (dataLimites.hasOwnProperty(item)) {
+			if (dataLimites[item].supp == "1") {
+				$("#disc-"+ dataLimites[item].id_d).parent().css("background-color", "#FFD282");
+			} else {
+				$("#disc-"+ dataLimites[item].id_d).parent().addClass("ca-highlight-no");
+			}
+		}
+	}
+});
+// Reset inputs
+$('#limites-reset').on('click', function() {
+	$('.input-limites').each(function() {
+		$(this).val("").trigger("code-change");
+		$(this).val("").parent().addClass("ca-highlight-no");
+	});
+	$(".w").show();
+	$(".m").show();
+});
+</script>
+{% endblock %}

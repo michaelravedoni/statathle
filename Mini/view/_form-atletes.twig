@@ -1,0 +1,10 @@
+<div class="ui form">
+	<div class="field">
+		<select class="ui search dropdown athletes" onchange="if (this.value) window.location.href=this.value">
+			<option value="">Prénom Nom</option>
+			{% for item in athletes %}
+			<option value="athletes/{{ item.id_a }}">{{ item.prenom_a }} {{ item.nom_a }} ({{ item.date_a|date('Y') }})</option>
+			{% endfor %}
+		</select>
+	</div>
+</div>

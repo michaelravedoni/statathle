@@ -1,0 +1,68 @@
+{% extends "_base.twig" %}
+{% set title = discipline.nom_d %}
+
+{% block content %}
+<div class="container" style="overflow-x:scroll;">
+	<div><a href="?sexe=m">Homme</a> / <a href="?sexe=w">Femme</a></div>
+	<div class="ui form">
+		<div class="field">
+			<select class="ui search dropdown" onchange="if (this.value) window.location.href=this.value">
+				<option value="">Sélectionner une discipline</option>
+				{% for disc in disciplines %}
+				<option value="{{disc.id_d}}">{{disc.nom_d}}</option>
+				{% endfor %}
+			</select>
+		</div>
+	</div>
+	
+	<h1>{{discipline.nom_d}} <span class="ca-small">- {% if sexe == 'm' %}<a href="?sexe=w">Toutes les femme</a>{% else %}<a href="?sexe=m">Tous les homme</a>{% endif %}<span></h1>
+	
+	<table id="results-table" class="ca-table">
+		<thead>
+			<tr>
+				<th>N°/id_r</th>
+				<th>Performances</th>
+				<th style="display: none">Performance</th>
+				<th>Athlète</th>
+				<th>Âge</th>
+				<th>Date</th>
+				<th>Compétition</th>
+				<th>Lieu</th>
+			</tr>
+		</thead>
+		<tbody>
+			{% if discipline.tri_d == 'ASC' %}{% set results = resultsMin %}{% else %}{% set results = resultsMax %}{% endif %}
+			{% for res in results %}
+			{% if res.date_c|date('Y') == "now"|date('Y') %}
+			<tr class="year">
+			{% else %}
+			<tr>
+			{% endif %}
+				<td id="nr" class="ca-bug"><a href="{{baseUrl}}resultat/{{res.id_r}}"><i class="bug icon"></i> {{loop.index}}/{{res.id_r}}</a></td>
+				<td class="performance">{{ res.performance }}</td>
+				<td style="display: none">{{ res.performance|replace({':': "", '.': "", 'h': ""}) }}</td>
+				<td id="athlete"><a href="{{baseUrl}}athletes/{{res.id_a}}">{{res.prenom_a}} {{res.nom_a}}</a></td>
+				<td id="date">{% set diffDate = date(res.date_c).diff(date(res.date_a)) %}{% if res.date_a != '0000-00-00' %}{{ (diffDate.days / 365)|round }}{% endif %}</td>
+				<td id="date">{{ res.date_c|date('d.m.Y') }}</td>
+				<td><a href="competitions/{{ res.id_c }}">{{ res.nom_c }}</a></td>
+				<td>{{ res.lieu_c }}</td>
+			</tr>
+			{% endfor %}
+		</tbody>
+	</table>
+	
+	<script>
+	$('#results-table').DataTable(
+		{
+			"paging":   false,
+			"ordering": false,
+			"info":     false,
+			"autoWidth": false,
+			"searching": false,
+			"dom": 'Bfrtip',
+			"buttons": ['copy', 'csv', 'excel', 'print']
+		} );
+		</script>
+	
+</div>
+{% endblock %}

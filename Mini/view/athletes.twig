@@ -1,0 +1,14 @@
+{% extends "_base.twig" %}
+{% set title = 'Athlètes' %}
+
+{% block content %}
+<div class="container">
+    <h1>Athlètes</h1>
+    
+    <!-- search song form -->
+    <div class="box">
+        <h2>Rechercher un athlète</h2>
+		{% include "_form-atletes.twig" %}
+    </div>
+</div>
+{% endblock %}

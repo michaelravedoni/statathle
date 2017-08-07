@@ -1,0 +1,69 @@
+{% import '_macros.twig' as macros %}
+
+{% block content %}
+
+{% set tableDisc = ['disc60m', 'disc80m', 'disc60mh', 'disc80mh', 'disc100mh', 'disc1000m', 'discHauteur', 'discLongueur', 'discPoids', 'discBalle', 'discJavelot'] %}
+
+{% spaceless %}
+Id;Nom;Prénom;Date_naissance;Année;Sexe;disc60m;disc80m;disc60mh;disc80mh;disc100mh;disc1000m;discHauteur;discLongueur;discPoids;discBalle;discJavelot;60m;80m;60mh;80mh;100mh;1000m;Hauteur;Longueur;Poids;Balle;Javelot<br />
+
+{% for item in athletes %}
+{{item.id_a}};{{item.nom_a}};{{item.prenom_a}};{{item.date_a|date('m.d.Y')}};{{item.date_a|date('Y')}};{{item.sexe_a}};
+
+{% for cell in tableDisc %}
+{% for res in attribute(_context, cell) if item.id_a == res.id_a %}
+{% if loop.first %}{{- macros.convPoints(item.sexe_a, res.id_d, res.performance) }};{% endif %}
+{% else %};{% endfor %}
+{% endfor %}
+
+{% for cell in tableDisc %}
+{% for res in attribute(_context, cell) if item.id_a == res.id_a %}
+{% if loop.first %}{{ res.performance }};{% endif %}
+{% else %};{% endfor %}
+{% endfor %}
+
+<br />
+{% endfor %}
+{% endspaceless %}
+
+
+{#
+{
+{% for item in athletes %}
+"{{item.id_a}}": {
+    "nom_a": "{{item.nom_a}}",
+    "prenom_a": "{{item.prenom_a}}",
+    "sexe_a": "{{item.sexe_a}}",
+    "date_a": "{{item.date_a|date('m.d.Y')}}",
+    "resultats": {
+{% for cell in tableDisc %}
+{% for res in attribute(_context, cell) if item.id_a == res.id_a %}
+{% if loop.first %}
+		"{{res.id_d}}" : ["{{cell}}", "{{ res.performance }}", "{{ macros.convPoints(item.sexe_a, res.id_d, res.performance) }}"],
+{% else %}
+
+{% endif %}
+{% endfor %}
+{% endfor %}
+}{%- if not loop.last -%},{%- endif -%}
+}{%- if not loop.last -%},{%- endif -%}
+{% endfor %}
+}
+
+
+<br />
+{
+  "id_a": {
+    "nom_a": "Mich",
+    "prenom_a": "Rave",
+    "sexe_a": "m",
+    "date_a": "2017-01-01",
+    "resultats": {
+      "id_d1": ["temps", "points"],
+      "id_d2": ["temps", "points"]
+    }
+  }
+}
+#}
+
+{% endblock %}

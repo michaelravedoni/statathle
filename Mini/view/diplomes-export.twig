@@ -1,0 +1,303 @@
+{% extends "_base.twig" %}
+{% import '_macros.twig' as macros %}
+{% set title = "Diplômes/Concours annuel" %}
+
+{% block content %}
+<style>
+.totalPointsD {border-right:solid 2px #222222;}
+.null {visibility: hidden;}
+</style>
+<div class="ui container">
+	<h1>Diplômes/Concours annuel/Super Pentathlon : {{annee}}</h1>
+	<p><span style="background-color:#90CAF9;width:10px;height:10px;display:inline-block;"></span> <span style="background-color:#ef9a9a;width:10px;height:10px;display:inline-block;"></span> : Disciplines prises en compte selon les différentes catégories.<br />
+		<span style="border:solid 1px red;background-color:#ffffff;width:10px;height:10px;display:inline-block;"></span> <span style="border:solid 1px blue;background-color:#ffffff;width:10px;height:10px;display:inline-block;"></span> : Le meilleur des deux course. U16M : 80m ou 100mh, U16W :  80m ou 80mh, U14M : 60m ou 80mh, U14W : 60m ou 60mh, U12 : 60m<br />
+		<span style="border:solid 1px green;background-color:#ffffff;width:10px;height:10px;display:inline-block;"></span> : Le meilleur des deux lancers.  U16 et U14 : poids ou javelot, U12 : poids ou balle.<br />
+		&oslash; : Manque une ou plusieurs disciplines pour former un pentathlon.<br />
+		&mdash; : Manque des points pour un diplôme.</p>
+	<p>Les compétitions contenant le mot "UBS" (pour <em>UBS Kids Cup</em>) ne sont pas prises en compte.</p>
+		
+	{% set tableDisc = ['disc60m', 'disc80m', 'disc60mh', 'disc80mh', 'disc100mh', 'disc1000m', 'discHauteur', 'discLongueur', 'discPoids', 'discBalle', 'discJavelot'] %}
+		
+	<table class="ca-table resultats" id="tableDiplomes">
+		<thead>
+			<tr class="title-row">
+				<th>Année</th>
+				<th>Sexe</th>
+				<th>Nom</th>
+				<th>Diplome</th>
+				<th>Points</th>
+				<th>Course</th>
+				<th>Lancer</th>
+				<th>Points total</th>
+				<th>60m</th>
+				<th>80m</th>
+				<th>60mh</th>
+				<th>80mh</th>
+				<th>100mh</th>
+				<th>1000m</th>
+				<th>Hauteur</th>
+				<th>Longueur</th>
+				<th>Poids</th>
+				<th>Balle</th>
+				<th>Javelot</th>
+				<th>60m</th>
+				<th>80m</th>
+				<th>60mh</th>
+				<th>80mh</th>
+				<th>100mh</th>
+				<th>1000m</th>
+				<th>Hauteur</th>
+				<th>Longueur</th>
+				<th>Poids</th>
+				<th>Balle</th>
+				<th>Javelot</th>
+			</tr>
+		</thead>
+		<tbody>
+			{% for item in athletes %}
+			<tr>
+				<td id="date" class="date">{{ item.date_a|date('Y') }}</td>
+				<td id="date" class="sexe">{{ item.sexe_a }}</td>
+				<td><a href="{{baseUrl}}athletes/{{ item.id_a }}">{{ item.nom_a }} {{ item.prenom_a }}</a></td>
+				<td class="diplome">&mdash;</td>
+				<td class="totalPointsD">-</td>
+				<td class="course">-</td>
+				<td class="lancer">-</td>
+				<td class="totalPoints">-</td>
+				{% for cell in tableDisc %}
+				<td {% for res in attribute(_context, cell) if item.id_a == res.id_a %}{% if loop.first %}style="{{macros.catDipl(annee, item.date_a|date('Y'), item.sexe_a, res.id_d)}} color:#222222;"{% endif %}{% endfor %}>{% for res in attribute(_context, cell) if item.id_a == res.id_a %}{% if loop.first %}<span class="points {{ cell }}">{{ macros.convPoints(item.sexe_a, res.id_d, res.performance) }}</span>{% endif %}{% else %}<span class="points {{ cell }} null">0</span>{% endfor %}</td>
+				{% endfor %}
+				{% for cell in tableDisc %}
+				<td {% for res in attribute(_context, cell) if item.id_a == res.id_a %}{% if loop.first %}style="{{macros.catDipl(annee, item.date_a|date('Y'), item.sexe_a, res.id_d)}} color:#222222;"{% endif %}{% endfor %}>{% for res in attribute(_context, cell) if item.id_a == res.id_a %}{% if loop.first %}{{ res.performance }}{% endif %}{% else %}0{% endfor %}</td>
+				{% endfor %}
+			</tr>
+			{% endfor %}
+		</tbody>
+	</table>
+		
+</div>
+
+<script>
+$(window).load(function(){
+	var totalsByRow = [{% for item in athletes %}0, {% endfor %}];
+	$(document).ready(function() {
+
+		var $dataRows = $("#tableDiplomes tr:not('.title-row')");
+
+		$dataRows.each(function(i) {
+			$(this).find('.points').each(function(j) {
+				totalsByRow[i] += parseInt($(this).html());
+			});
+		});
+    
+		$("#tableDiplomes .totalPoints").each(function(i) {
+			if (totalsByRow[i] > 0) {
+				$(this).html(totalsByRow[i]);
+			}
+			else {
+				$(this).html('-');
+			}
+		});
+		
+		
+		var year = "{{annee}}";
+		var u16MaxYear = {{annee -15}};
+		var u14MaxYear = {{annee -13}};
+		var u12MaxYear = {{annee -11}};
+		var u10MaxYear = {{annee -9}};
+		
+		var anneeNaissance = $("#tableDiplomes .date");
+		var sexe = $("#tableDiplomes .sexe");
+		var disc60m = $("#tableDiplomes .disc60m");
+		var disc80m = $("#tableDiplomes .disc80m");
+		var disc60mh = $("#tableDiplomes .disc60mh");
+		var disc80mh = $("#tableDiplomes .disc80mh");
+		var disc100mh = $("#tableDiplomes .disc100mh");
+		var disc1000m = $("#tableDiplomes .disc1000m");
+		var discHauteur = $("#tableDiplomes .discHauteur");
+		var discLongueur = $("#tableDiplomes .discLongueur");
+		var discPoids = $("#tableDiplomes .discPoids");
+		var discBalle = $("#tableDiplomes .discBalle");
+		var discJavelot = $("#tableDiplomes .discJavelot");
+		var course = $("#tableDiplomes .course");
+		var lancer = $("#tableDiplomes .lancer");
+		var totalPointsD = $("#tableDiplomes .totalPointsD");
+		var totalPoints = $("#tableDiplomes .totalPoints");
+		var diplome = $("#tableDiplomes .diplome");
+		
+		// Total fonction
+		function total(disc1000m, discHauteur, discLongueur, course, lancer) {
+			return parseInt(disc1000m) + parseInt(discHauteur) + parseInt(discLongueur) + parseInt(course) + parseInt(lancer);
+		}
+			
+		for (var j = 0; j < totalPoints.length; j++) {
+			//U16 M
+			if (sexe[j].innerHTML == 'm' && parseInt(anneeNaissance[j].innerHTML) >= u16MaxYear && parseInt(anneeNaissance[j].innerHTML) < u14MaxYear) {
+				// U16Course
+				if (disc80m[j].innerHTML > disc100mh[j].innerHTML) {
+					$(course[j]).html(disc80m[j].innerHTML);
+				} else {
+					$(course[j]).html(disc100mh[j].innerHTML);
+				}
+				// U16Lancer
+				if (discPoids[j].innerHTML > discJavelot[j].innerHTML) {
+					$(lancer[j]).html(discPoids[j].innerHTML);
+				} else {
+					$(lancer[j]).html(discJavelot[j].innerHTML);
+				}
+				// Total points
+				$(totalPointsD[j]).html(total(disc1000m[j].innerHTML, discHauteur[j].innerHTML, discLongueur[j].innerHTML, course[j].innerHTML, lancer[j].innerHTML));
+				// Diplome
+				if (totalPointsD[j].innerHTML >= 2600) {
+					$(diplome[j]).html('Or');
+				}
+				else if (totalPointsD[j].innerHTML >= 2200 && totalPointsD[j].innerHTML < 2600) {
+					$(diplome[j]).html('Argent');
+				}
+				else if (totalPointsD[j].innerHTML >= 1800 && totalPointsD[j].innerHTML < 2200) {
+					$(diplome[j]).html('Bronze');
+				}
+			}
+			//U14M
+			if (sexe[j].innerHTML == 'm' && parseInt(anneeNaissance[j].innerHTML) >= u14MaxYear && parseInt(anneeNaissance[j].innerHTML) < u12MaxYear) {
+				// U14MCourse
+				if (disc60m[j].innerHTML > disc80mh[j].innerHTML) {
+					$(course[j]).html(disc60m[j].innerHTML);
+				} else {
+					$(course[j]).html(disc80mh[j].innerHTML);
+				}
+				// U14MLancer
+				if (discPoids[j].innerHTML > discJavelot[j].innerHTML) {
+					$(lancer[j]).html(discPoids[j].innerHTML);
+				} else {
+					$(lancer[j]).html(discJavelot[j].innerHTML);
+				}
+				// Total points
+				$(totalPointsD[j]).html(total(disc1000m[j].innerHTML, discHauteur[j].innerHTML, discLongueur[j].innerHTML, course[j].innerHTML, lancer[j].innerHTML));
+				// Diplome
+				if (totalPointsD[j].innerHTML >= 2100) {
+					$(diplome[j]).html('Or');
+				}
+				else if (totalPointsD[j].innerHTML >= 1700 && totalPointsD[j].innerHTML < 2100) {
+					$(diplome[j]).html('Argent');
+				}
+				else if (totalPointsD[j].innerHTML >= 1300 && totalPointsD[j].innerHTML < 1700) {
+					$(diplome[j]).html('Bronze');
+				}
+			}
+			//U12M
+			if (sexe[j].innerHTML == 'm' && parseInt(anneeNaissance[j].innerHTML) >= u12MaxYear && parseInt(anneeNaissance[j].innerHTML) < u10MaxYear) {
+				// U12MCourse
+				$(course[j]).html(disc60m[j].innerHTML);
+				// U12MLancer
+				if (discPoids[j].innerHTML > discBalle[j].innerHTML) {
+					$(lancer[j]).html(discPoids[j].innerHTML);
+				} else {
+					$(lancer[j]).html(discBalle[j].innerHTML);
+				}
+				// Total points
+				$(totalPointsD[j]).html(total(disc1000m[j].innerHTML, discHauteur[j].innerHTML, discLongueur[j].innerHTML, course[j].innerHTML, lancer[j].innerHTML));
+				// Diplome
+				if (totalPointsD[j].innerHTML >= 1600) {
+					$(diplome[j]).html('Or');
+				}
+				else if (totalPointsD[j].innerHTML >= 1200 && totalPointsD[j].innerHTML < 1600) {
+					$(diplome[j]).html('Argent');
+				}
+				else if (totalPointsD[j].innerHTML >= 800 && totalPointsD[j].innerHTML < 1200) {
+					$(diplome[j]).html('Bronze');
+				}
+			}
+			//U16W
+			if (sexe[j].innerHTML == 'w' && parseInt(anneeNaissance[j].innerHTML) >= u16MaxYear && parseInt(anneeNaissance[j].innerHTML) < u14MaxYear) {
+				// U16WCourse
+				if (disc80m[j].innerHTML > disc80mh[j].innerHTML) {
+					$(course[j]).html(disc80m[j].innerHTML);
+				} else {
+					$(course[j]).html(disc80mh[j].innerHTML);
+				}
+				// U16WLancer
+				if (discPoids[j].innerHTML > discJavelot[j].innerHTML) {
+					$(lancer[j]).html(discPoids[j].innerHTML);
+				} else {
+					$(lancer[j]).html(discJavelot[j].innerHTML);
+				}
+				// Total points
+				$(totalPointsD[j]).html(total(disc1000m[j].innerHTML, discHauteur[j].innerHTML, discLongueur[j].innerHTML, course[j].innerHTML, lancer[j].innerHTML));
+				// Diplome
+				if (totalPointsD[j].innerHTML >= 2600) {
+					$(diplome[j]).html('Or');
+				}
+				else if (totalPointsD[j].innerHTML >= 2200 && totalPointsD[j].innerHTML < 2600) {
+					$(diplome[j]).html('Argent');
+				}
+				else if (totalPointsD[j].innerHTML >= 1800 && totalPointsD[j].innerHTML < 2200) {
+					$(diplome[j]).html('Bronze');
+				}
+			}
+			//U14W
+			if (sexe[j].innerHTML == 'w' && parseInt(anneeNaissance[j].innerHTML) >= u14MaxYear && parseInt(anneeNaissance[j].innerHTML) < u12MaxYear) {
+				// U14WCourse
+				if (disc60m[j].innerHTML > disc60mh[j].innerHTML) {
+					$(course[j]).html(disc60m[j].innerHTML);
+				} else {
+					$(course[j]).html(disc60mh[j].innerHTML);
+				}
+				// U14WLancer
+				if (discPoids[j].innerHTML > discJavelot[j].innerHTML) {
+					$(lancer[j]).html(discPoids[j].innerHTML);
+				} else {
+					$(lancer[j]).html(discJavelot[j].innerHTML);
+				}
+				// Total points
+				$(totalPointsD[j]).html(total(disc1000m[j].innerHTML, discHauteur[j].innerHTML, discLongueur[j].innerHTML, course[j].innerHTML, lancer[j].innerHTML));
+				// Diplome
+				if (totalPointsD[j].innerHTML >= 2300) {
+					$(diplome[j]).html('Or');
+				}
+				else if (totalPointsD[j].innerHTML >= 1900 && totalPointsD[j].innerHTML < 2300) {
+					$(diplome[j]).html('Argent');
+				}
+				else if (totalPointsD[j].innerHTML >= 1600 && totalPointsD[j].innerHTML < 1900) {
+					$(diplome[j]).html('Bronze');
+				}
+			}
+			//U12W
+			if (sexe[j].innerHTML == 'w' && parseInt(anneeNaissance[j].innerHTML) >= u12MaxYear && parseInt(anneeNaissance[j].innerHTML) < u10MaxYear) {
+				// U12WCourse
+				$(course[j]).html(disc60m[j].innerHTML);
+				// U12WLancer
+				if (discPoids[j].innerHTML > discBalle[j].innerHTML) {
+					$(lancer[j]).html(discPoids[j].innerHTML);
+				} else {
+					$(lancer[j]).html(discBalle[j].innerHTML);
+				}
+				// Total points
+				$(totalPointsD[j]).html(total(disc1000m[j].innerHTML, discHauteur[j].innerHTML, discLongueur[j].innerHTML, course[j].innerHTML, lancer[j].innerHTML));
+				// Diplome
+				if (totalPointsD[j].innerHTML >= 1800) {
+					$(diplome[j]).html('Or');
+				}
+				else if (totalPointsD[j].innerHTML >= 1400 && totalPointsD[j].innerHTML < 1800) {
+					$(diplome[j]).html('Argent');
+				}
+				else if (totalPointsD[j].innerHTML >= 1000 && totalPointsD[j].innerHTML < 1400) {
+					$(diplome[j]).html('Bronze');
+				}
+			}
+			// Manque discipline
+			if (disc1000m[j].innerHTML == "0" || discHauteur[j].innerHTML == "0" || discLongueur[j].innerHTML == "0" || course[j].innerHTML == "0" || lancer[j].innerHTML == "0") {
+				$(diplome[j]).html('&oslash;');
+			}
+			// Pas de résultats
+			if (totalPoints[j].innerHTML == '-') {
+				$(diplome[j]).parent().css("opacity", "0.2");
+				$(diplome[j]).html('-');
+			}
+		}
+		
+	});
+});
+</script>
+
+{% endblock %}
