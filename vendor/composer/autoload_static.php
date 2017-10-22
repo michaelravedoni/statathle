@@ -7,66 +7,164 @@ namespace Composer\Autoload;
 class ComposerStaticInit68947b74321bcc7e7f4671269ff6190f
 {
     public static $files = array (
+        '0e6d7bf4a5811bfa5cf40c5ccd6fae6a' => __DIR__ . '/..' . '/symfony/polyfill-mbstring/bootstrap.php',
+        '5255c38a0faeba867671b61dfda6d864' => __DIR__ . '/..' . '/paragonie/random_compat/lib/random.php',
+        '023d27dca8066ef29e6739335ea73bad' => __DIR__ . '/..' . '/symfony/polyfill-php70/bootstrap.php',
+        '6a47392539ca2329373e0d33e1dba053' => __DIR__ . '/..' . '/symfony/polyfill-intl-icu/bootstrap.php',
         'd1ab833cf2d687a2cf421f59f7c98a2d' => __DIR__ . '/..' . '/panique/pdo-debug/pdo-debug.php',
         '713b52c45daebafcea655af0c213c935' => __DIR__ . '/..' . '/panique/php-sass/sass-compiler.php',
     );
 
     public static $prefixLengthsPsr4 = array (
+        'k' => 
+        array (
+            'koenster\\PHPLanguageDetection\\' => 30,
+        ),
+        'U' => 
+        array (
+            'Ulrichsg\\Getopt\\' => 16,
+        ),
         'T' => 
         array (
+            'Twig\\Extensions\\' => 16,
             'Twig\\' => 5,
         ),
         'S' => 
         array (
+            'Symfony\\Polyfill\\Php70\\' => 23,
+            'Symfony\\Polyfill\\Mbstring\\' => 26,
             'Symfony\\Component\\Yaml\\' => 23,
-            'Spatie\\ArrayToXml\\' => 18,
+            'Symfony\\Component\\Translation\\' => 30,
+            'Symfony\\Component\\Routing\\' => 26,
+            'Symfony\\Component\\PropertyAccess\\' => 33,
+            'Symfony\\Component\\OptionsResolver\\' => 34,
+            'Symfony\\Component\\Intl\\' => 23,
+            'Symfony\\Component\\Inflector\\' => 28,
+            'Symfony\\Component\\Form\\' => 23,
+            'Symfony\\Component\\Filesystem\\' => 29,
+            'Symfony\\Component\\EventDispatcher\\' => 34,
+            'Symfony\\Component\\Debug\\' => 24,
+            'Symfony\\Component\\Console\\' => 26,
+            'Symfony\\Bridge\\Twig\\' => 20,
             'Slim\\Views\\' => 11,
         ),
-        'N' => 
+        'R' => 
         array (
-            'Noodlehaus\\' => 11,
+            'ReadmeGen\\' => 10,
+        ),
+        'P' => 
+        array (
+            'Psr\\Log\\' => 8,
         ),
         'M' => 
         array (
+            'Monolog\\' => 8,
             'Mini\\' => 5,
             'MatthiasMullie\\PathConverter\\' => 29,
             'MatthiasMullie\\Minify\\' => 22,
         ),
         'L' => 
         array (
-            'League\\Flysystem\\' => 17,
             'Leafo\\ScssPhp\\' => 14,
-        ),
-        'I' => 
-        array (
-            'IS\\Slim\\LiteConfiguration\\' => 26,
         ),
     );
 
     public static $prefixDirsPsr4 = array (
+        'koenster\\PHPLanguageDetection\\' => 
+        array (
+            0 => __DIR__ . '/..' . '/koenster/php-language-detection/src',
+        ),
+        'Ulrichsg\\Getopt\\' => 
+        array (
+            0 => __DIR__ . '/..' . '/ulrichsg/getopt-php/src',
+        ),
+        'Twig\\Extensions\\' => 
+        array (
+            0 => __DIR__ . '/..' . '/twig/extensions/src',
+        ),
         'Twig\\' => 
         array (
             0 => __DIR__ . '/..' . '/twig/twig/src',
+        ),
+        'Symfony\\Polyfill\\Php70\\' => 
+        array (
+            0 => __DIR__ . '/..' . '/symfony/polyfill-php70',
+        ),
+        'Symfony\\Polyfill\\Mbstring\\' => 
+        array (
+            0 => __DIR__ . '/..' . '/symfony/polyfill-mbstring',
         ),
         'Symfony\\Component\\Yaml\\' => 
         array (
             0 => __DIR__ . '/..' . '/symfony/yaml',
         ),
-        'Spatie\\ArrayToXml\\' => 
+        'Symfony\\Component\\Translation\\' => 
         array (
-            0 => __DIR__ . '/..' . '/spatie/array-to-xml/src',
+            0 => __DIR__ . '/..' . '/symfony/translation',
+        ),
+        'Symfony\\Component\\Routing\\' => 
+        array (
+            0 => __DIR__ . '/..' . '/symfony/routing',
+        ),
+        'Symfony\\Component\\PropertyAccess\\' => 
+        array (
+            0 => __DIR__ . '/..' . '/symfony/property-access',
+        ),
+        'Symfony\\Component\\OptionsResolver\\' => 
+        array (
+            0 => __DIR__ . '/..' . '/symfony/options-resolver',
+        ),
+        'Symfony\\Component\\Intl\\' => 
+        array (
+            0 => __DIR__ . '/..' . '/symfony/intl',
+        ),
+        'Symfony\\Component\\Inflector\\' => 
+        array (
+            0 => __DIR__ . '/..' . '/symfony/inflector',
+        ),
+        'Symfony\\Component\\Form\\' => 
+        array (
+            0 => __DIR__ . '/..' . '/symfony/form',
+        ),
+        'Symfony\\Component\\Filesystem\\' => 
+        array (
+            0 => __DIR__ . '/..' . '/symfony/filesystem',
+        ),
+        'Symfony\\Component\\EventDispatcher\\' => 
+        array (
+            0 => __DIR__ . '/..' . '/symfony/event-dispatcher',
+        ),
+        'Symfony\\Component\\Debug\\' => 
+        array (
+            0 => __DIR__ . '/..' . '/symfony/debug',
+        ),
+        'Symfony\\Component\\Console\\' => 
+        array (
+            0 => __DIR__ . '/..' . '/symfony/console',
+        ),
+        'Symfony\\Bridge\\Twig\\' => 
+        array (
+            0 => __DIR__ . '/..' . '/symfony/twig-bridge',
         ),
         'Slim\\Views\\' => 
         array (
             0 => __DIR__ . '/..' . '/slim/views',
         ),
-        'Noodlehaus\\' => 
+        'ReadmeGen\\' => 
         array (
-            0 => __DIR__ . '/..' . '/hassankhan/config/src',
+            0 => __DIR__ . '/..' . '/fojuth/readmegen/src',
+        ),
+        'Psr\\Log\\' => 
+        array (
+            0 => __DIR__ . '/..' . '/psr/log/Psr/Log',
+        ),
+        'Monolog\\' => 
+        array (
+            0 => __DIR__ . '/..' . '/monolog/monolog/src/Monolog',
         ),
         'Mini\\' => 
         array (
-            0 => __DIR__ . '/../..' . '/Mini',
+            0 => __DIR__ . '/../..' . '/app',
         ),
         'MatthiasMullie\\PathConverter\\' => 
         array (
@@ -76,26 +174,26 @@ class ComposerStaticInit68947b74321bcc7e7f4671269ff6190f
         array (
             0 => __DIR__ . '/..' . '/matthiasmullie/minify/src',
         ),
-        'League\\Flysystem\\' => 
-        array (
-            0 => __DIR__ . '/..' . '/league/flysystem/src',
-        ),
         'Leafo\\ScssPhp\\' => 
         array (
             0 => __DIR__ . '/..' . '/leafo/scssphp/src',
-        ),
-        'IS\\Slim\\LiteConfiguration\\' => 
-        array (
-            0 => __DIR__ . '/..' . '/ibnusyuhada/slim-lite-configuration/src',
         ),
     );
 
     public static $prefixesPsr0 = array (
         'T' => 
         array (
+            'Twig_Extensions_' => 
+            array (
+                0 => __DIR__ . '/..' . '/twig/extensions/lib',
+            ),
             'Twig_' => 
             array (
                 0 => __DIR__ . '/..' . '/twig/twig/lib',
+            ),
+            'Twig\\Gettext' => 
+            array (
+                0 => __DIR__ . '/..' . '/umpirsky/twig-gettext-extractor',
             ),
         ),
         'S' => 
@@ -108,6 +206,16 @@ class ComposerStaticInit68947b74321bcc7e7f4671269ff6190f
     );
 
     public static $classMap = array (
+        'ArithmeticError' => __DIR__ . '/..' . '/symfony/polyfill-php70/Resources/stubs/ArithmeticError.php',
+        'AssertionError' => __DIR__ . '/..' . '/symfony/polyfill-php70/Resources/stubs/AssertionError.php',
+        'Collator' => __DIR__ . '/..' . '/symfony/intl/Resources/stubs/Collator.php',
+        'DivisionByZeroError' => __DIR__ . '/..' . '/symfony/polyfill-php70/Resources/stubs/DivisionByZeroError.php',
+        'Error' => __DIR__ . '/..' . '/symfony/polyfill-php70/Resources/stubs/Error.php',
+        'IntlDateFormatter' => __DIR__ . '/..' . '/symfony/intl/Resources/stubs/IntlDateFormatter.php',
+        'Locale' => __DIR__ . '/..' . '/symfony/intl/Resources/stubs/Locale.php',
+        'NumberFormatter' => __DIR__ . '/..' . '/symfony/intl/Resources/stubs/NumberFormatter.php',
+        'ParseError' => __DIR__ . '/..' . '/symfony/polyfill-php70/Resources/stubs/ParseError.php',
+        'TypeError' => __DIR__ . '/..' . '/symfony/polyfill-php70/Resources/stubs/TypeError.php',
         'scss_formatter' => __DIR__ . '/..' . '/leafo/scssphp/classmap.php',
         'scss_formatter_compressed' => __DIR__ . '/..' . '/leafo/scssphp/classmap.php',
         'scss_formatter_crunched' => __DIR__ . '/..' . '/leafo/scssphp/classmap.php',

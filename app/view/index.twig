@@ -1,0 +1,41 @@
+{% extends "_base.twig" %}
+{% block content %}
+<div class="">
+	<div class="ui three stackable cards">
+		<div class="ui card">
+			<div class="image">
+				<img src="{{siteUrl}}assets/images/athletes.jpg" class="fluid image"/>
+			</div>
+			<div class="content">
+				<a href="{{siteUrl}}athletes" class="header">{{"Search an athlete"|trans}}</a>
+				<div class="description">
+					{% include "_form-atletes.twig" %}
+				</div>
+			</div>
+		</div>
+		<a href="{{baseUrl}}statistiques" class="ui card">
+			<div class="image">
+				<img src="{{siteUrl}}assets/images/stats.jpg" class="fluid image"/>
+			</div>
+			<div class="content">
+				<div class="header">{{ config.organisation_name ~ " records"|trans}}</div>
+				<div class="description">{{"Access to the records by discipline"|trans}}</div>
+			</div>
+		</a>
+		<a href="{{baseUrl}}reports" class="ui card">
+			<div class="image">
+				<img src="{{siteUrl}}assets/images/bilans.jpg" class="fluid image"/>
+			</div>
+			<div class="content">
+				<div class="header">{{"Consult the seasons reports"|trans}}</div>
+				<div class="description">{{"Consult the season reports : medals and internationals participations."|trans}}</div>
+			</div>
+		</a>
+	</div>
+	<div class="ui segment">
+		<div class="ui text justified container">
+			{% include "_notes.twig" %}
+		</div>
+	</div>
+</div>
+{% endblock %}

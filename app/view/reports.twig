@@ -1,0 +1,14 @@
+{% extends "_base.twig" %}
+{% set title = 'Reports' %}
+
+{% block content %}
+    <div class="container">
+        <h1>{{"Reports"|trans}}</h1>
+		<h2>{{"Season report"|trans}}</h2>
+		<p>{{trans}}{{config.organisation_name}} athletes medals by championnships.{{endtrans}}</p>
+        <ul>
+			<li><a href="#0" target="_blank">{{"Season report"|trans}} 2013</a></li>
+			<li><a href="#0" target="_blank">{{"Season report"|trans}} 2014</a></li>
+		</ul>
+    </div>
+{% endblock %}

@@ -1,7 +1,7 @@
 {
   "name": "statathle",
   "description": "Command line tool for generating a changelog from git tags and commit history",
-  "version": "0.0.1",
+  "version": "0.0.1-beta",
   "author": "Michael Ravedoni (http://github.com/michaelravedoni)",
   "homepage": "https://github.com/michaelravedoni/statathle",
   "repository": {

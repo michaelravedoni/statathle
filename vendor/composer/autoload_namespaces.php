@@ -6,6 +6,8 @@ $vendorDir = dirname(dirname(__FILE__));
 $baseDir = dirname($vendorDir);
 
 return array(
+    'Twig_Extensions_' => array($vendorDir . '/twig/extensions/lib'),
     'Twig_' => array($vendorDir . '/twig/twig/lib'),
+    'Twig\\Gettext' => array($vendorDir . '/umpirsky/twig-gettext-extractor'),
     'Slim' => array($vendorDir . '/slim/slim'),
 );

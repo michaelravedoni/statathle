@@ -6,6 +6,5 @@ RewriteEngine On
 #
 # RewriteBase /
 
-# TODO: prevent access to /scss
 RewriteCond %{REQUEST_FILENAME} !-f
 RewriteRule ^ index.php [QSA,L]

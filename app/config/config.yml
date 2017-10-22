@@ -1,0 +1,198 @@
+# ######################################################################
+# # COMMON DEFAULTS                                                    #
+# ######################################################################
+
+# ----------------------------------------------------------------------
+# | Application                                                        |
+# ----------------------------------------------------------------------
+
+App: &App
+
+    ## Leave blank if you want the user browser langage. default : en_US
+    language_code               : ''
+
+    app_name                    : 'StatAthlé'
+    organisation_name           : 'Organisation Name'
+    organisation_url            : '#'
+    launch_year                 : '2017'
+    data_licence                : 'by/4.0'
+
+    responsible_mail            : 'responsable@exemple.com'
+
+    messages:
+      mail:
+        bug_subject             : ''
+        bug_body                : ''
+
+    metas:
+        title                   : 'StatAthlé'
+        title_separator         : ' | '
+        description             : ""
+
+    # false or Google Analytics ID 'UA-XXXXX-Y'
+    google_analytics_id         : false
+
+    # false or Piwik ID '1' and URL 'domain.tld/folder'
+    piwik_site_id               : false
+    piwik_url                   : ''
+
+# ----------------------------------------------------------------------
+# | PHP                                                                |
+# ----------------------------------------------------------------------
+
+PHP: &PHP
+    log_errors                  : true
+    display_errors              : true
+    display_startup_errors      : true
+    default_timezone            : 'Europe/Paris'
+
+# ----------------------------------------------------------------------
+# | Session (needed for Flash messages or CSRF protection)             |
+# ----------------------------------------------------------------------
+
+Session: &Session
+    enable                      : false
+    name                        : 'Slim3'
+    lifetime                    : 0
+    path                        : '/'
+    domain                      : ''
+    secure                      : false
+    httponly                    : true
+    cache_limiter               : 'nocache'
+
+# ----------------------------------------------------------------------
+# | Slim                                                               |
+# ----------------------------------------------------------------------
+
+Slim: &Slim
+    displayErrorDetails         : true
+
+# ----------------------------------------------------------------------
+# | Security                                                           |
+# ----------------------------------------------------------------------
+
+Security: &Security
+    enable_csrf_token_persistence: false
+
+# ----------------------------------------------------------------------
+# | Monolog                                                            |
+# ----------------------------------------------------------------------
+
+Monolog: &Monolog
+    loggerName                  : 'Slim3'
+    StreamHandler: &StreamHandler
+        enable                  : true
+        logLevel                : DEBUG
+    NativeMailerHandler: &NativeMailerHandler
+        enable                  : false
+        logLevel                : ERROR
+        to                      : ''
+        subject                 : 'Error'
+        from                    : { 'no-reply@localhost.com': 'Slim 3 Skeleton' }
+    SwiftMailerHandler: &SwiftMailerHandler
+        enable                  : false
+        logLevel                : ERROR
+        to                      : ''
+        subject                 : 'Error'
+        from                    : { 'no-reply@localhost.com': 'Slim 3 Skeleton' }
+
+# ----------------------------------------------------------------------
+# | Twig                                                               |
+# ----------------------------------------------------------------------
+
+# http://twig.sensiolabs.org/doc/api.html
+
+Twig: &Twig
+    debug                       : true
+    cache                       : false
+    auto_reload                 : true
+    strict_variables            : true
+
+# ----------------------------------------------------------------------
+# | Swift Mailer                                                       |
+# ----------------------------------------------------------------------
+
+# http://swiftmailer.org/docs/sending.html
+
+SwiftMailer: &SwiftMailer
+    # smtp, sendmail, false
+    transport                   : smtp
+    auth_mode                   : ''
+    username                    : ''
+    password                    : ''
+    host                        : ''
+    port                        : ''
+    encryption                  : ''
+    command                     : null
+
+# ######################################################################
+# # ENVIRONMENT SPECIFIC                                               #
+# ######################################################################
+
+# ----------------------------------------------------------------------
+# | Development                                                        |
+# ----------------------------------------------------------------------
+
+development:
+    PHP:
+        <<: *PHP
+        display_errors          : true
+        display_startup_errors  : true
+
+    Session:
+        <<: *Session
+
+    Slim:
+        <<: *Slim
+        displayErrorDetails     : true
+
+    Security:
+        <<: *Security
+
+    Monolog:
+        <<: *Monolog
+
+    Twig:
+        <<: *Twig
+        debug                   : true
+
+    SwiftMailer:
+        <<: *SwiftMailer
+
+    App:
+        <<: *App
+
+# ----------------------------------------------------------------------
+# | Production                                                         |
+# ----------------------------------------------------------------------
+
+production:
+    PHP:
+        <<: *PHP
+
+    Session:
+        <<: *Session
+
+    Slim:
+        <<: *Slim
+
+    Security:
+        <<: *Security
+
+    Monolog:
+        <<: *Monolog
+        StreamHandler:
+            <<: *StreamHandler
+            logLevel            : WARNING
+        SwiftMailerHandler:
+            <<: *SwiftMailerHandler
+            enable              : true
+
+    Twig:
+        <<: *Twig
+
+    SwiftMailer:
+        <<: *SwiftMailer
+
+    App:
+        <<: *App

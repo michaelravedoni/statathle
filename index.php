@@ -1,127 +1,158 @@
 <?php
 
-/******************************* LOADING & INITIALIZING BASE APPLICATION ****************************************/
+// In case you need it, uncoment this two lines to dubug code
+//error_reporting(E_ALL);
+//ini_set("display_errors", 1);
 
-// Configuration for error reporting, useful to show every little problem during development
-error_reporting(E_ALL);
-ini_set("display_errors", 1);
+// ========== PATHS ==========
 
-// set a constant that holds the project's folder path, like "/var/www/".
-// DIRECTORY_SEPARATOR adds a slash to the end of the path
-define('ROOT', posix_getcwd() . DIRECTORY_SEPARATOR);
-// set a constant that holds the project's "application" folder, like "/var/www/application".
-define('APP', ROOT . 'Mini' . DIRECTORY_SEPARATOR);
+define('ROOT_PATH', posix_getcwd());
+define('APP_PATH',  ROOT_PATH.'/app');
+define('VAR_PATH',  ROOT_PATH.'/var');
+define('WWW_PATH',  ROOT_PATH.'');
 
-// load application config (error reporting etc.)
-require APP . 'config/config.php';
+// ========== PHP (static) ==========
 
-$configs = include(APP . 'config/config.php');
+// errors
 
-// Load Composer's PSR-4 autoloader (necessary to load Slim, Mini etc.)
-require 'vendor/autoload.php';
+// https://github.com/filp/whoops
+// https://github.com/Seldaek/monolog
+// https://github.com/kint-php/kint
+// https://github.com/maximebf/php-debugbar
+// 
+error_reporting(-1);
+ini_set('error_log', VAR_PATH.'/log/php-'.date('Y-m').'.log');
 
-// Initialize Slim (the router/micro framework used)
+// charset
+ini_set('default_charset', 'UTF-8');
+
+// ========== COMPOSER ==========
+
+require ROOT_PATH.'/vendor/autoload.php';
+
+// ========== CONFIGURATION ==========
+
+$config_env = require APP_PATH . '/config/env.php';
+$config = require APP_PATH . '/config.php';
+$config_db = require APP_PATH . '/config/db.php';
+
+// ===== ENVIRONMENT MODE ========
+
+$config_mode = $config_env['mode'];
+
+// ========== PHP (from configuration) ==========
+
+// time zone
+date_default_timezone_set($config['PHP']['default_timezone']);
+
+// errors
+ini_set('display_errors',         $config['PHP']['display_errors']);
+ini_set('display_startup_errors', $config['PHP']['display_startup_errors']);
+ini_set('log_errors',             $config['PHP']['log_errors']);
+
+unset($config['PHP']);
+
+// ========== i18n ==========
+
+// https://stackoverflow.com/questions/30570929/detect-browser-language-in-php-and-set-locale-accordingly
+// https://github.com/KuenzelIT/auto-lang
+// https://github.com/Menencia/locale-detector
+// https://github.com/sinergi/php-browser-detector
+// https://github.com/fisharebest/localization
+// https://github.com/basz/SlmLocale
+// https://github.com/oscarotero/Gettext
+// http://www.lostinsoftware.com/2015/02/php-internationalization-with-gettext/
+
+use Symfony\Component\Console\Application;
+use Symfony\Component\Console\Input\InputInterface;
+use Symfony\Component\Console\Input\InputArgument;
+use Symfony\Component\Console\Input\InputOption;
+use Symfony\Component\Console\Output\OutputInterface;
+ 
+//$application = new Application();
+//$application->run();
+
+// Symfony namespaces
+use Symfony\Bridge\Twig\Extension\TranslationExtension;
+use Symfony\Component\Translation\Loader\PhpFileLoader;
+use Symfony\Component\Translation\MessageSelector;
+use Symfony\Component\Translation\Translator;
+
+// language
+if ($config['App']['language_code'] == "") {
+	$lang = substr($_SERVER['HTTP_ACCEPT_LANGUAGE'], 0, 2);
+} else {
+	$lang = $config['App']['language_code'];
+}
+
+// First param is the "default language" to use.
+$translator = new Translator($lang, new MessageSelector());
+// Set a fallback language incase you don't have a translation in the default language
+$translator->setFallbackLocales(['en_US']);
+// Add a loader that will get the php files we are going to store our translations in
+$translator->addLoader('php', new PhpFileLoader());
+// Add language files here
+$translator->addResource('php', APP_PATH . '/lang/fr.php', 'fr');
+$translator->addResource('php', APP_PATH . '/lang/en.php', 'en');
+
+
+// ========== SLIM ==========
+
+// Create Slim app @see http://
 $app = new \Slim\Slim(array(
-
-// Set the current mode
-    'mode' => 'development',
-// Set global variables
-	'appTitle' => $configs['appTitle'],
+	'settings' => $config,
+	'mode' => $config_mode,
 ));
 
 // and define the engine used for the view @see http://twig.sensiolabs.org
 $app->view = new \Slim\Views\Twig(['cache' => false]);
-$app->view->setTemplatesDirectory("Mini/view");
+$app->view->setTemplatesDirectory(APP_PATH. "/view");
 
 $app->view->parserExtensions = [
 	new \Slim\Views\TwigExtension(),
+	new TranslationExtension($translator),
 	new \Twig_Extension_Debug()
 ];
-/******************************************* THE CONFIGS *******************************************************/
 
-// Configs for mode "development" (Slim's default), see the GitHub readme for details on setting the environment
-$app->configureMode('development', function () use ($app) {
+	
+// Pass config variable from config.yml (only 'App' and'Security) to all the views.
+// Use {{ config.xxx }} Twig syntax
+$mergedConfig = array_merge($config['App'], $config['Security']);
+$app->view->set("config", $mergedConfig);
 
-    // pre-application hook, performs stuff before real action happens @see http://docs.slimframework.com/#Hooks
-	$app->hook('slim.before', function () use ($app) {
+// Pass url variables from config/env.php to all the views.
+// Use {{ siteUrl }} and {{ currentUrl }} Twig syntax
+$app->view->set("siteUrl", $config_env[$app->mode]['siteUrl']);
+$app->view->set("currentUrl", $config_env[$app->mode]['siteUrl'] . $app->request->getResourceUri());
 
-        // SASS-to-CSS compiler @see https://github.com/panique/php-sass
-        SassCompiler::run("scss/", "css/");
+// ========== SLIM ==========
 
-        // CSS minifier @see https://github.com/matthiasmullie/minify
-        $minifier = new MatthiasMullie\Minify\CSS('css/style.css');
-        $minifier->minify('css/style.css');
+// pre-application hook, performs stuff before real action happens @see http://docs.slimframework.com/#Hooks
+$app->hook('slim.before', function () use ($app) {
+	
+	// SASS-to-CSS compiler @see https://github.com/panique/php-sass
+	/*
+	if ($config_mode) == 'development') {
+		//SassCompiler::run("scss/", "css/");
+		}
+	*/
 
-        // JS minifier @see https://github.com/matthiasmullie/minify
-        // DON'T overwrite your real .js files, always save into a different file
-        //$minifier = new MatthiasMullie\Minify\JS('js/application.js');
-        //$minifier->minify('js/application.minified.js');
-    });
+	// CSS minifier @see https://github.com/matthiasmullie/minify
+	$minifier = new MatthiasMullie\Minify\CSS('assets/css/style.css');
+	$minifier->minify('assets/css/style.min.css');
 
-    // Set the configs for development environment
-    $app->config(array(
-		'log.enable' => true,
-        'debug' => true,
-		'siteUrl'  => URL,
-		'basePath' => ROOT,
-		'currentUrl' => URL . $app->request->getResourceUri(),
-        'database' => array(
-            'db_host' => 'localhost',
-            'db_port' => '8889',
-            'db_name' => 'stats',
-            'db_user' => 'root',
-            'db_pass' => 'root'
-        )
-    ));
+	// JS minifier @see https://github.com/matthiasmullie/minify
+	// DON'T overwrite your real .js files, always save into a different file
+	//$minifier = new MatthiasMullie\Minify\JS('js/application.js');
+	//$minifier->minify('js/application.min.js');
 });
 
-// Configs for mode "production"
-$app->configureMode('production', function () use ($app) {
+// ========== MODEL ==========
 
-	// pre-application hook, performs stuff before real action happens @see http://docs.slimframework.com/#Hooks
-    $app->hook('slim.before', function () use ($app) {
+// Initialize the model, pass the database configs. $model can now perform all methods from Mini\Model\Model.php
+$model = new Mini\Model\Model($config_db[$app->mode]);
 
-		$app->view()->appendData(array(
-			'baseUrl' => 'URL',
-			'currentUrl' => 'URL'.$app->request->getResourceUri()
-		));
-
-        // SASS-to-CSS compiler @see https://github.com/panique/php-sass
-        SassCompiler::run("scss/", "css/");
-
-        // CSS minifier @see https://github.com/matthiasmullie/minify
-        $minifier = new MatthiasMullie\Minify\CSS('css/style.css');
-        $minifier->minify('css/style.css');
-
-        // JS minifier @see https://github.com/matthiasmullie/minify
-        // DON'T overwrite your real .js files, always save into a different file
-        //$minifier = new MatthiasMullie\Minify\JS('js/application.js');
-        //$minifier->minify('js/application.minified.js');
-    });
-
-    // Set the configs for production environment
-    $app->config(array(
-		'log.enable' => false,
-        'debug' => false,
-		'siteUrl'  => URL,
-		'basePath' => ROOT,
-		'currentUrl' => URL . $app->request->getResourceUri(),
-        'database' => array(
-            'db_host' => '',
-            'db_port' => '',
-            'db_name' => '',
-            'db_user' => '',
-            'db_pass' => ''
-        )
-    ));
-});
-
-/******************************************** THE MODEL ********************************************************/
-
-// Initialize the model, pass the database configs. $model can now perform all methods from Mini\model\model.php
-$model = new \Mini\Model\Model($app->config('database'));
-
-/************************************ THE ROUTES / CONTROLLERS *************************************************/
+// ========== THE ROUTES / CONTROLLERS ==========
 
 // GET request on homepage, simply show the view template index.twig
 $app->get('/', function () use ($app, $model) {
@@ -133,99 +164,11 @@ $app->get('/', function () use ($app, $model) {
 		));
 	});
 
-// All requests on /songs and behind (/songs/search etc) are grouped here. Note that $model is passed (as some routes
-// in /songs... use the model)
-$app->group('/songs', function () use ($app, $model) {
-
-    // GET request on /songs. Perform actions getAmountOfSongs() and getAllSongs() and pass the result to the view.
-    // Note that $model is passed to the route via "use ($app, $model)". I've written it like that to prevent creating
-    // the model / database connection in routes that does not need the model / db connection.
-    $app->get('/', function () use ($app, $model) {
-
-        $athletesCount = $model->getAmountOfSongs();
-        $athletes = $model->getAllSongs();
-
-        $app->render('songs.twig', array(
-            'athletesCount' => $athletesCount,
-            'athletes' => $athletes
-        ));
-    });
-
-    // POST request on /songs/addsong (after a form submission from /songs). Asks for POST data, performs
-    // model-action and passes POST data to it. Redirects the user afterwards to /songs.
-    $app->post('/addsong', function () use ($app, $model) {
-
-        // in a real-world app it would be useful to validate the values (inside the model)
-        $model->addSong(
-            $_POST["artist"], $_POST["track"], $_POST["link"], $_POST["year"], $_POST["country"], $_POST["genre"]);
-        $app->redirect('/songs');
-    });
-
-    // GET request on /songs/deletesong/:song_id, where :song_id is a mandatory song id.
-    // Performs an action on the model and redirects the user to /songs.
-    $app->get('/deletesong/:song_id', function ($song_id) use ($app, $model) {
-
-        $model->deleteSong($song_id);
-        $app->redirect('/songs');
-    });
-
-    // GET request on /songs/editsong/:song_id. Should be self-explaining. If song id exists show the editing page,
-    // if not redirect the user. Note the short syntax: 'song' => $model->getSong($song_id)
-    $app->get('/editsong/:song_id', function ($song_id) use ($app, $model) {
-
-        $song = $model->getSong($song_id);
-
-        if (!$song) {
-            $app->redirect('/songs');
-        }
-
-        $app->render('songs.edit.twig', array('song' => $song));
-    });
-
-    // POST request on /songs/updatesong. Self-explaining.
-    $app->post('/updatesong', function () use ($app, $model) {
-
-        // passing an array would be better here, but for simplicity this way it okay
-        $model->updateSong($_POST['song_id'], $_POST["artist"], $_POST["track"], $_POST["link"], $_POST["year"],
-            $_POST["country"], $_POST["genre"]);
-
-        $app->redirect('/songs');
-    });
-
-    // GET request on /songs/ajaxGetStats. In this demo application this route is used to request data via
-    // JavaScript (AJAX). Note that this does not render a view, it simply echoes out JSON.
-    $app->get('/ajaxGetStats', function () use ($app, $model) {
-
-        $amount_of_songs = $model->getAmountOfSongs();
-        $app->contentType('application/json;charset=utf-8');
-        echo json_encode($amount_of_songs);
-    });
-
-    // POST request on /search. Self-explaining.
-    $app->post('/search', function () use ($app, $model) {
-
-        $result_songs = $model->searchSong($_POST['search_term']);
-
-        $app->render('songs.search.twig', array(
-            'amount_of_results' => count($result_songs),
-            'songs' => $result_songs
-        ));
-    });
-
-    // GET request on /search. Simply redirects the user to /songs
-    $app->get('/search', function () use ($app) {
-        $app->redirect('/songs');
-    });
-
-});
-
 // All requests on /athletes and behind (/athletes/search etc) are grouped here. Note that $model is passed (as some routes
 // in /athletes... use the model)
 $app->group('/athletes', function () use ($app, $model) {
 
     // GET request on /athletes. Perform actions getAllAthletes() and pass the result to the view.
-    // Note that $model is passed to the route via "use ($app, $model)". I've written it like that to prevent creating
-    // the model / database connection in routes that does not need the model / db connection.
     $app->get('/', function () use ($app, $model) {
         $athletes = $model->getAllAthletes();
 
@@ -234,8 +177,7 @@ $app->group('/athletes', function () use ($app, $model) {
         ));
 	});
 
-	// GET request on /songs/:athlete_id. Should be self-explaining. If song id exists show the editing page,
-    // if not redirect the user. Note the short syntax: 'athletes' => $model->getAthlete($athlete_id)
+	// GET request on /songs/:athlete_id. If athlete id exists show the athlete page.
     $app->get('/:athlete_id', function ($athlete_id) use ($app, $model) {
 
         $discipline_id = $app->request->params('disc');
@@ -243,6 +185,7 @@ $app->group('/athletes', function () use ($app, $model) {
 
 		$athlete = $model->getAthlete($athlete_id);
 		$results = $model->getResults($athlete_id);
+		//$years = $model->getAthleteYears($athlete_id);
 		$recordsAsc = $model->getRecordsAsc($athlete_id);
 		$recordsDesc = $model->getRecordsDesc($athlete_id);
 		$disciplines = $model->getDisciplines($athlete_id);
@@ -269,7 +212,7 @@ $app->group('/athletes', function () use ($app, $model) {
 
 });
 
-// GET request on /statistiques, simply show the view template statistiques.twig
+// GET request on resultat/:resultat_id, simply show the view template resultat.twig
 $app->get('/resultat/:resultat_id', function ($resultat_id) use ($app, $model) {
 
     $resultat = $model->getResultat($resultat_id);
@@ -280,7 +223,7 @@ $app->get('/resultat/:resultat_id', function ($resultat_id) use ($app, $model) {
 	));
 });
 
-// GET request on /competitions, simply show the view template competitions.twig
+// GET request on /competitions/:competition_id, simply show the view template competitions.twig
 $app->get('/competitions/:competition_id', function ($competition_id) use ($app, $model) {
 
     $resultats = $model->getResultatsByCompetition($competition_id);
@@ -291,19 +234,18 @@ $app->get('/competitions/:competition_id', function ($competition_id) use ($app,
 	));
 });
 
-// GET request on /bilans, simply show the view template bilans.twig
-$app->get('/bilans', function () use ($app) {
-    $app->render('bilans.twig');
+// GET request on /reports, simply show the view template reports.twig
+$app->get('/reports', function () use ($app) {
+    $app->render('reports.twig');
 });
 
-// GET request on /bilans, simply show the view template bilans.twig
-$app->get('/a-propos', function () use ($app) {
-    $app->render('a-propos.twig');
+// GET request on /about, simply show the view template about.twig
+$app->get('/about', function () use ($app) {
+    $app->render('about.twig');
 });
 
-// GET request on /statistiques, simply show the view template statistiques.twig
+// GET request on /statistiques, redirect to id 42 : statistiques/42 (100m in the database)
 $app->get('/statistiques', function () use ($app) {
-	// redirect to id 42 (100m in the database)
     $app->redirect('statistiques/42');
 });
 
@@ -331,7 +273,7 @@ $app->get('/statistiques/:discipline_id', function ($discipline_id = "42") use (
 	));
 });
 
-// GET request on /diplomes/:annee, simply show the view template statistiques.twig
+// GET request on /diplomes/:annee, simply show the view template diplomes.twig
 $app->get('/diplomes/:annee', function ($annee) use ($app, $model) {
 
 	$anneeMin = (string) $annee - 15;
@@ -367,7 +309,7 @@ $app->get('/diplomes/:annee', function ($annee) use ($app, $model) {
 	));
 });
 
-// GET request on /diplomes-export/:annee, simply show the view template statistiques.twig
+// GET request on /diplomes-export/:annee, simply show the view template diplomes-export.twig
 $app->get('/diplomes-export/:annee', function ($annee) use ($app, $model) {
 
 	$anneeMin = (string) $annee - 15;
@@ -508,8 +450,8 @@ $app->get('/categories(/:annee(/:categorie))', function ($annee = NULL, $categor
 			'annee' => date("Y"),
 			'categorie' => "all",
 		));
-	} // end /categories
-});
+	}
+}); // end /categories
 
 /******************************************* RUN THE APP *******************************************************/
 

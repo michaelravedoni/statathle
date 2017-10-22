@@ -1,0 +1,12 @@
+{% extends "_base.twig" %}
+{% set title = 'À propos' %}
+
+{% block content %}
+<div class="container">
+	<h1>{{ "About"|trans }}</h1>
+	<p>This web application is built with <a href="https://github.com/michaelravedoni/statathle" target="_blank"><i class="github icon"></i>StatAthlé</a> by <a href="https://github.com/michaelravedoni/resume" target="_blank">Michael Ravedoni</a>.</p>
+	<p>For optimal site operation, we recommend using the most recent versions of your web browser. Major difficulties are encountered with older versions of Internet Explorer. Also check that javascript (or "active scripting" for Internet Explorer) is enabled in your browser.</p>
+	<div class="ui center aligned container">The <cite>{{config.app_name}}</cite> of {{config.organisation_name}} {{ "data are licensed under"|trans }} <a rel="license" href="http://creativecommons.org/licenses/{{config.data_licence}}/" target="_blank"><img alt="Licence Creative Commons {{config.data_licence}}" style="border-width:0;vertical-align:text-bottom;" src="https://i.creativecommons.org/l/{{config.data_licence}}/88x31.png" /></a></div>
+	<div class="ui center aligned container">The <a href="https://github.com/michaelravedoni/statathle" target="_blank">StatAthlé</a> app is licensed under the <a href="https://github.com/michaelravedoni/statathle/blob/master/LICENSE">MIT License</a>.</div>
+</div>
+{% endblock %}
